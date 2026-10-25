@@ -165,6 +165,17 @@
   #edBar button.on{background:#c01010;}
   #edBar button.ok{background:#2c9a4a;}
   #edHint{position:absolute;left:6px;bottom:6px;background:rgba(18,32,58,.7);color:#fff;border-radius:8px;padding:4px 10px;font-size:min(3vh,14px);pointer-events:none;}
+
+  /* экран кодов */
+  #codes .panel{text-align:left;}
+  #codeInput{
+    width:100%;box-sizing:border-box;padding:14px;border-radius:10px;border:1px solid #789;
+    background:#fff;color:#111;font-size:18px;letter-spacing:.08em;font-family:inherit;margin:8px 0;
+  }
+  #codeMsg{min-height:1.4em;font-weight:700;margin:4px 0 10px;}
+  #codeMsg.ok{color:#7CFF9E;}
+  #codeMsg.err{color:#FF8A80;}
+  #codeInfo{font-size:min(3.2vh,15px);opacity:.8;margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -196,6 +207,7 @@
     <button class="mm" id="mmShop" style="left:74.5%;top:2.8%"><span class="ic">🛍</span>Магазин</button>
     <button class="mm" id="mmSkins" style="left:74.5%;top:19.3%"><span class="ic">👕</span>Скины</button>
     <button class="mm" id="mmSettings" style="left:74.5%;top:35.7%"><span class="ic">⚙</span>Настройки</button>
+    <button class="mm" id="mmCodes" style="left:37.9%;top:2.8%"><span class="ic">🔑</span>КОДЫ</button>
     <div id="mmCoins">Монеты: 0</div>
     <button class="mm" id="mmMulti" style="left:37.9%;top:35.7%;width:24.2%;height:13.9%;justify-content:center;padding-left:0"><span class="ic">🌐</span>СЕТЬ</button>
     <div id="mmFlag"></div>
@@ -273,6 +285,18 @@
       <h2>СКИНЫ</h2>
       <div id="skinList" class="cards"></div>
       <button class="mbtn" id="skBack">Назад</button>
+    </div>
+  </div>
+
+  <!-- коды -->
+  <div id="codes" class="screen dim">
+    <div class="panel">
+      <h2>КОДЫ</h2>
+      <div id="codeInfo">Введи промокод и получи награду. Регистр не важен.</div>
+      <input id="codeInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="введите код…">
+      <div id="codeMsg"></div>
+      <button class="mbtn" id="codeApply">Активировать</button>
+      <button class="mbtn sec" id="codeBack">Назад</button>
     </div>
   </div>
 
@@ -889,6 +913,15 @@ for(let i=0;i<N;i++){
 }
 const hair=new THREE.Mesh(sphGeo,new THREE.MeshPhongMaterial({color:0x3a2a1c,shininess:20}));hair.scale.set(.225,.225,.225);scene.add(hair);
 const eye=new THREE.Mesh(sphGeo,new THREE.MeshBasicMaterial({color:0x111111}));eye.scale.set(.04,.04,.04);scene.add(eye);
+// вспомогательные меши для смайлика
+const smileyEye=new THREE.Mesh(sphGeo,new THREE.MeshBasicMaterial({color:0x111111}));
+smileyEye.scale.set(.05,.07,.05);smileyEye.visible=false;scene.add(smileyEye);
+const smileyMouth=[];
+const mouthMat=new THREE.MeshBasicMaterial({color:0x111111});
+for(let k=0;k<12;k++){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(.035,.018,.02),mouthMat);
+  m.visible=false;scene.add(m);smileyMouth.push(m);
+}
 const shadow=new THREE.Mesh(new THREE.CircleGeometry(.55,20),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.28}));
 shadow.rotation.x=-Math.PI/2;scene.add(shadow);
 
@@ -1540,7 +1573,8 @@ const SKINS=[
   {id:'green',name:'Зелёный',price:30,skin:0xd9a074,shirt:0x2e9e4f,pants:0x5d4037,shoe:0xf2f2f2,hair:0x1b1b1b},
   {id:'ninja',name:'Ниндзя',price:60,skin:0xe3b08a,shirt:0x1c1c1c,pants:0x1c1c1c,shoe:0x111111,hair:0x111111},
   {id:'dummy',name:'Манекен',price:90,skin:0xb5772a,shirt:0xb5772a,pants:0xa06a24,shoe:0x8a5a1e,hair:0x6b4216},
-  {id:'gold',name:'Золотой',price:150,skin:0xf3d27a,shirt:0xd4a017,pants:0x8a6d0b,shoe:0xffe082,hair:0x8a6d0b}
+  {id:'gold',name:'Золотой',price:150,skin:0xf3d27a,shirt:0xd4a017,pants:0x8a6d0b,shoe:0xffe082,hair:0x8a6d0b},
+  {id:'smiley',name:'Смайлик',price:0,skin:0xffd400,shirt:0xffd400,pants:0xffd400,shoe:0xffd400,hair:0xffd400,smiley:true}
 ];
 let owned=null;
 let curSkin=store.get('pk_skin','classic');
@@ -1549,10 +1583,15 @@ function recolor(set,hex){
   const f={n:1,m:.88,f:.68};
   for(const k in f){set[k].color.setHex(hex);set[k].color.multiplyScalar(f[k]);}
 }
+let smileyActive=false;
 function applySkin(id){
   const s=SKINS.find(x=>x.id===id)||SKINS[0];
   recolor(SKIN,s.skin);recolor(SHIRT,s.shirt);recolor(PANTS,s.pants);recolor(SHOE,s.shoe);
   hair.material.color.setHex(s.hair);
+  smileyActive=!!s.smiley;
+  if(smileyActive){
+    hair.material.color.setHex(0xffd400);
+  }
 }
 function hexCss(c){return '#'+(c|0x1000000).toString(16).slice(1);}
 function swatches(s){return '<div class="sw"><i style="background:'+hexCss(s.shirt)+'"></i><i style="background:'+hexCss(s.pants)+'"></i><i style="background:'+hexCss(s.skin)+'"></i><i style="background:'+hexCss(s.shoe)+'"></i></div>';}
@@ -2232,7 +2271,7 @@ addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('gesturestart',e=>e.preventDefault());
 
 /* ---------- экраны и настройки ---------- */
-const SCREENS=['main','settings','controls','help','shop','skins','editor','multiplayer'];
+const SCREENS=['main','settings','controls','help','shop','skins','editor','multiplayer','codes'];
 let screenId=null,settingsFrom='main',inMenu=false;
 const GRAVS=[['Земля',18],['Марс',10],['Луна',6]];
 let gIdx=0,best=0,touchUI=true;
@@ -2300,7 +2339,7 @@ function escapeKey(){
   else if(screenId==='settings')closeSettings();
   else if(screenId==='controls'||screenId==='help'){capture=null;openSettings(settingsFrom);}
   else if(screenId==='editor'){edSave();goMain();}
-  else if(screenId==='shop'||screenId==='skins')goMain();
+  else if(screenId==='shop'||screenId==='skins'||screenId==='codes')goMain();
 }
 function startGame(){
   newGame();
@@ -2331,6 +2370,35 @@ $('hBack').addEventListener('click',()=>openSettings(settingsFrom));
 $('sRestart').addEventListener('click',()=>{newGame();hideScreens();paused=false;});
 $('sHome').addEventListener('click',goMain);
 
+/* ---------- коды ---------- */
+const CODES = {
+  v3r1t1: { name:'Смайлик', skin:'smiley', once:true }
+};
+let usedCodes = store.get('pk_codes',[]);
+if(!Array.isArray(usedCodes))usedCodes=[];
+$('mmCodes').addEventListener('click',()=>{
+  $('codeMsg').textContent='';$('codeMsg').className='';
+  showScreen('codes');paused=true;
+});
+$('codeBack').addEventListener('click',goMain);
+function applyCode(){
+  const raw=$('codeInput').value.trim().toLowerCase();
+  const msg=$('codeMsg');
+  if(!raw){msg.className='err';msg.textContent='Введи код.';return;}
+  const c=CODES[raw];
+  if(!c){msg.className='err';msg.textContent='Код не найден.';return;}
+  if(usedCodes.indexOf(raw)>=0){msg.className='err';msg.textContent='Этот код уже активирован.';return;}
+  if(c.skin){
+    if(owned.indexOf(c.skin)<0)owned.push(c.skin);
+    curSkin=c.skin;store.set('pk_skin',curSkin);applySkin(curSkin);
+  }
+  usedCodes.push(raw);store.set('pk_codes',usedCodes);
+  msg.className='ok';msg.textContent='Активировано: '+c.name+'!';
+  $('codeInput').value='';
+}
+$('codeApply').addEventListener('click',applyCode);
+$('codeInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyCode();}});
+
 /* ---------- Общий сетевой сервер (WebSocket) ---------- */
 let mpConn=null,mpLastSend=0,mpLocalParts=[],mpLocalId=null;
 const mpRemotePlayers=new Map();
@@ -2338,7 +2406,7 @@ function mpStatus(t){const el=$('mpStatus');if(el)el.textContent=t;}
 function mpRemoveRemote(id){const r=mpRemotePlayers.get(id);if(!r)return;scene.remove(r.group);r.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material.dispose();}});mpRemotePlayers.delete(id);}
 function mpClean(){if(mpConn){try{mpConn.close();}catch(_){}}mpConn=null;mpLocalId=null;for(const id of [...mpRemotePlayers.keys()])mpRemoveRemote(id);}
 function mpGetLocalParts(){
-  const sources=[...limbs,...joints,hair,eye];
+  const sources=[...limbs,...joints,hair,eye,smileyEye,...smileyMouth];
   hatOuter.traverse(o=>{if(o.isMesh)sources.push(o);});
   pantsRoot.traverse(o=>{if(o.isMesh)sources.push(o);});
   if(cloth&&cloth.mesh)sources.push(cloth.mesh);
@@ -2386,7 +2454,6 @@ $('mpBack').addEventListener('click',()=>showScreen('main'));
 $('mmMulti').addEventListener('click',()=>{showScreen('multiplayer');paused=true;mpConnectServer();});
 function mpResolvePlayerCollision(remote,dt){
   const clamp01=(v)=>Math.max(0,Math.min(1,v));
-  // Стандартный персонаж: его игровой прямоугольный хитбокс.
   const localBox=mode!==PHYS,remoteBox=!remote.phys||!Array.isArray(remote.bodies);
   if(localBox&&remoteBox){
     const w=(HW+(Number.isFinite(remote.bodyW)?remote.bodyW:HW));
@@ -2426,8 +2493,6 @@ function mpResolvePlayerCollision(remote,dt){
     }
     return;
   }
-  // Обычный управляемый персонаж против сегментов ragdoll: столкновение по телу,
-  // с вертикальным разделением, чтобы можно было запрыгнуть на другого игрока.
   const left=C.x-HW,right=C.x+HW,bottom=C.by,top=C.by+BODY_H;
   for(const b of remoteBodies){
     const cb=Math.cos(b.a||0),sb=Math.sin(b.a||0);
@@ -2679,6 +2744,29 @@ function frame(now){
     const fx=uy*face,fy=-ux*face;
     hair.position.set(X[HEAD]+ux*.06-fx*.05,Y[HEAD]+uy*.06-fy*.05,0);
     eye.position.set(X[HEAD]+fx*.19+ux*.03,Y[HEAD]+fy*.19+uy*.03,.11);
+    // лицо смайлика
+    if(smileyActive){
+      eye.visible=true;
+      eye.material.color.setHex(0x111111);
+      eye.scale.set(.05,.07,.05);
+      const ex2 = X[HEAD]+fx*.11+ux*.03, ey2=Y[HEAD]+fy*.11+uy*.03;
+      smileyEye.position.set(ex2,ey2,.11);
+      smileyEye.visible=true;
+      for(let k=0;k<smileyMouth.length;k++){
+        const t=k/(smileyMouth.length-1);
+        const ang=Math.PI*(0.15+t*0.7);
+        const rx=Math.cos(ang)*.13, ry=-Math.sin(ang)*.11;
+        const wx=X[HEAD]+fx*rx+ux*ry*0.6;
+        const wy=Y[HEAD]+fy*rx+uy*ry*0.6;
+        const mm=smileyMouth[k];
+        mm.position.set(wx,wy,.12);
+        mm.rotation.z=Math.atan2(fy,fx)-ang;
+        mm.visible=true;
+      }
+    } else {
+      smileyEye.visible=false;
+      for(const m of smileyMouth)m.visible=false;
+    }
     const want=(inShop&&previewHat!==null)?previewHat:curHat;
     if(want!==hatShown)buildHat(want);
     hatOuter.visible=(want!=='none');
