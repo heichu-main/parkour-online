@@ -165,17 +165,6 @@
   #edBar button.on{background:#c01010;}
   #edBar button.ok{background:#2c9a4a;}
   #edHint{position:absolute;left:6px;bottom:6px;background:rgba(18,32,58,.7);color:#fff;border-radius:8px;padding:4px 10px;font-size:min(3vh,14px);pointer-events:none;}
-
-  /* экран кодов */
-  #codes .panel{text-align:left;}
-  #codeInput{
-    width:100%;box-sizing:border-box;padding:14px;border-radius:10px;border:1px solid #789;
-    background:#fff;color:#111;font-size:18px;letter-spacing:.08em;font-family:inherit;margin:8px 0;
-  }
-  #codeMsg{min-height:1.4em;font-weight:700;margin:4px 0 10px;}
-  #codeMsg.ok{color:#7CFF9E;}
-  #codeMsg.err{color:#FF8A80;}
-  #codeInfo{font-size:min(3.2vh,15px);opacity:.8;margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -207,7 +196,6 @@
     <button class="mm" id="mmShop" style="left:74.5%;top:2.8%"><span class="ic">🛍</span>Магазин</button>
     <button class="mm" id="mmSkins" style="left:74.5%;top:19.3%"><span class="ic">👕</span>Скины</button>
     <button class="mm" id="mmSettings" style="left:74.5%;top:35.7%"><span class="ic">⚙</span>Настройки</button>
-    <button class="mm" id="mmCodes" style="left:37.9%;top:2.8%"><span class="ic">🔑</span>КОДЫ</button>
     <div id="mmCoins">Монеты: 0</div>
     <button class="mm" id="mmMulti" style="left:37.9%;top:35.7%;width:24.2%;height:13.9%;justify-content:center;padding-left:0"><span class="ic">🌐</span>СЕТЬ</button>
     <div id="mmFlag"></div>
@@ -285,18 +273,6 @@
       <h2>СКИНЫ</h2>
       <div id="skinList" class="cards"></div>
       <button class="mbtn" id="skBack">Назад</button>
-    </div>
-  </div>
-
-  <!-- коды -->
-  <div id="codes" class="screen dim">
-    <div class="panel">
-      <h2>КОДЫ</h2>
-      <div id="codeInfo">Введи промокод и получи награду. Регистр не важен.</div>
-      <input id="codeInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="введите код…">
-      <div id="codeMsg"></div>
-      <button class="mbtn" id="codeApply">Активировать</button>
-      <button class="mbtn sec" id="codeBack">Назад</button>
     </div>
   </div>
 
@@ -913,15 +889,6 @@ for(let i=0;i<N;i++){
 }
 const hair=new THREE.Mesh(sphGeo,new THREE.MeshPhongMaterial({color:0x3a2a1c,shininess:20}));hair.scale.set(.225,.225,.225);scene.add(hair);
 const eye=new THREE.Mesh(sphGeo,new THREE.MeshBasicMaterial({color:0x111111}));eye.scale.set(.04,.04,.04);scene.add(eye);
-// вспомогательные меши для смайлика
-const smileyEye=new THREE.Mesh(sphGeo,new THREE.MeshBasicMaterial({color:0x111111}));
-smileyEye.scale.set(.05,.07,.05);smileyEye.visible=false;scene.add(smileyEye);
-const smileyMouth=[];
-const mouthMat=new THREE.MeshBasicMaterial({color:0x111111});
-for(let k=0;k<12;k++){
-  const m=new THREE.Mesh(new THREE.BoxGeometry(.035,.018,.02),mouthMat);
-  m.visible=false;scene.add(m);smileyMouth.push(m);
-}
 const shadow=new THREE.Mesh(new THREE.CircleGeometry(.55,20),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.28}));
 shadow.rotation.x=-Math.PI/2;scene.add(shadow);
 
@@ -1573,8 +1540,7 @@ const SKINS=[
   {id:'green',name:'Зелёный',price:30,skin:0xd9a074,shirt:0x2e9e4f,pants:0x5d4037,shoe:0xf2f2f2,hair:0x1b1b1b},
   {id:'ninja',name:'Ниндзя',price:60,skin:0xe3b08a,shirt:0x1c1c1c,pants:0x1c1c1c,shoe:0x111111,hair:0x111111},
   {id:'dummy',name:'Манекен',price:90,skin:0xb5772a,shirt:0xb5772a,pants:0xa06a24,shoe:0x8a5a1e,hair:0x6b4216},
-  {id:'gold',name:'Золотой',price:150,skin:0xf3d27a,shirt:0xd4a017,pants:0x8a6d0b,shoe:0xffe082,hair:0x8a6d0b},
-  {id:'smiley',name:'Смайлик',price:0,skin:0xffd400,shirt:0xffd400,pants:0xffd400,shoe:0xffd400,hair:0xffd400,smiley:true}
+  {id:'gold',name:'Золотой',price:150,skin:0xf3d27a,shirt:0xd4a017,pants:0x8a6d0b,shoe:0xffe082,hair:0x8a6d0b}
 ];
 let owned=null;
 let curSkin=store.get('pk_skin','classic');
@@ -1583,15 +1549,10 @@ function recolor(set,hex){
   const f={n:1,m:.88,f:.68};
   for(const k in f){set[k].color.setHex(hex);set[k].color.multiplyScalar(f[k]);}
 }
-let smileyActive=false;
 function applySkin(id){
   const s=SKINS.find(x=>x.id===id)||SKINS[0];
   recolor(SKIN,s.skin);recolor(SHIRT,s.shirt);recolor(PANTS,s.pants);recolor(SHOE,s.shoe);
   hair.material.color.setHex(s.hair);
-  smileyActive=!!s.smiley;
-  if(smileyActive){
-    hair.material.color.setHex(0xffd400);
-  }
 }
 function hexCss(c){return '#'+(c|0x1000000).toString(16).slice(1);}
 function swatches(s){return '<div class="sw"><i style="background:'+hexCss(s.shirt)+'"></i><i style="background:'+hexCss(s.pants)+'"></i><i style="background:'+hexCss(s.skin)+'"></i><i style="background:'+hexCss(s.shoe)+'"></i></div>';}
@@ -2271,7 +2232,7 @@ addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('gesturestart',e=>e.preventDefault());
 
 /* ---------- экраны и настройки ---------- */
-const SCREENS=['main','settings','controls','help','shop','skins','editor','multiplayer','codes'];
+const SCREENS=['main','settings','controls','help','shop','skins','editor','multiplayer'];
 let screenId=null,settingsFrom='main',inMenu=false;
 const GRAVS=[['Земля',18],['Марс',10],['Луна',6]];
 let gIdx=0,best=0,touchUI=true;
@@ -2339,7 +2300,7 @@ function escapeKey(){
   else if(screenId==='settings')closeSettings();
   else if(screenId==='controls'||screenId==='help'){capture=null;openSettings(settingsFrom);}
   else if(screenId==='editor'){edSave();goMain();}
-  else if(screenId==='shop'||screenId==='skins'||screenId==='codes')goMain();
+  else if(screenId==='shop'||screenId==='skins')goMain();
 }
 function startGame(){
   newGame();
@@ -2370,43 +2331,15 @@ $('hBack').addEventListener('click',()=>openSettings(settingsFrom));
 $('sRestart').addEventListener('click',()=>{newGame();hideScreens();paused=false;});
 $('sHome').addEventListener('click',goMain);
 
-/* ---------- коды ---------- */
-const CODES = {
-  v3r1t1: { name:'Смайлик', skin:'smiley', once:true }
-};
-let usedCodes = store.get('pk_codes',[]);
-if(!Array.isArray(usedCodes))usedCodes=[];
-$('mmCodes').addEventListener('click',()=>{
-  $('codeMsg').textContent='';$('codeMsg').className='';
-  showScreen('codes');paused=true;
-});
-$('codeBack').addEventListener('click',goMain);
-function applyCode(){
-  const raw=$('codeInput').value.trim().toLowerCase();
-  const msg=$('codeMsg');
-  if(!raw){msg.className='err';msg.textContent='Введи код.';return;}
-  const c=CODES[raw];
-  if(!c){msg.className='err';msg.textContent='Код не найден.';return;}
-  if(usedCodes.indexOf(raw)>=0){msg.className='err';msg.textContent='Этот код уже активирован.';return;}
-  if(c.skin){
-    if(owned.indexOf(c.skin)<0)owned.push(c.skin);
-    curSkin=c.skin;store.set('pk_skin',curSkin);applySkin(curSkin);
-  }
-  usedCodes.push(raw);store.set('pk_codes',usedCodes);
-  msg.className='ok';msg.textContent='Активировано: '+c.name+'!';
-  $('codeInput').value='';
-}
-$('codeApply').addEventListener('click',applyCode);
-$('codeInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyCode();}});
-
 /* ---------- Общий сетевой сервер (WebSocket) ---------- */
 let mpConn=null,mpLastSend=0,mpLocalParts=[],mpLocalId=null;
+const MP_INTERPOLATION_DELAY=90; // запас времени для плавного отображения между сетевыми пакетами
 const mpRemotePlayers=new Map();
 function mpStatus(t){const el=$('mpStatus');if(el)el.textContent=t;}
 function mpRemoveRemote(id){const r=mpRemotePlayers.get(id);if(!r)return;scene.remove(r.group);r.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material.dispose();}});mpRemotePlayers.delete(id);}
 function mpClean(){if(mpConn){try{mpConn.close();}catch(_){}}mpConn=null;mpLocalId=null;for(const id of [...mpRemotePlayers.keys()])mpRemoveRemote(id);}
 function mpGetLocalParts(){
-  const sources=[...limbs,...joints,hair,eye,smileyEye,...smileyMouth];
+  const sources=[...limbs,...joints,hair,eye];
   hatOuter.traverse(o=>{if(o.isMesh)sources.push(o);});
   pantsRoot.traverse(o=>{if(o.isMesh)sources.push(o);});
   if(cloth&&cloth.mesh)sources.push(cloth.mesh);
@@ -2425,19 +2358,48 @@ function mpApplyAppearance(data,id){
   if(!Array.isArray(data)||!data.length||!id||id===mpLocalId)return;
   mpRemoveRemote(id);const group=new THREE.Group(),parts=[];
   for(const p of data){const g=new THREE.BufferGeometry();for(const [name,a] of Object.entries(p.g?.attrs||{}))g.setAttribute(name,new THREE.Float32BufferAttribute(a.array,a.itemSize,a.normalized));if(p.g?.index)g.setIndex(p.g.index);if(g.attributes.position)g.computeBoundingSphere();const d=p.mat||{};const opts={color:d.color??0xffffff,opacity:d.opacity??1,transparent:!!d.transparent,side:d.side??THREE.DoubleSide,vertexColors:!!d.vertexColors,depthWrite:d.depthWrite!==false,shininess:d.shininess??30};const mat=d.kind==='basic'?new THREE.MeshBasicMaterial(opts):new THREE.MeshPhongMaterial(opts);const mesh=new THREE.Mesh(g,mat);mesh.matrixAutoUpdate=false;group.add(mesh);parts.push(mesh);}
-  scene.add(group);mpRemotePlayers.set(id,{group,parts,data:null});
+  scene.add(group);mpRemotePlayers.set(id,{group,parts,data:null,snapshots:[]});
 }
 function mpHandlePacket(packet){
   if(!packet||typeof packet!=='object')return;
   if(packet.type==='welcome'){
     mpLocalId=packet.id;mpStatus('Подключено к общему серверу. Игроков: '+(packet.players?.length||0));
-    for(const p of (packet.players||[])){if(p.appearance)mpApplyAppearance(p.appearance,p.id);const r=mpRemotePlayers.get(p.id);if(r&&p.state)r.data=p.state;else if(p.state){const group=new THREE.Group();scene.add(group);mpRemotePlayers.set(p.id,{group,parts:[],data:p.state});}}
+    for(const p of (packet.players||[])){if(p.appearance)mpApplyAppearance(p.appearance,p.id);const r=mpRemotePlayers.get(p.id);if(r&&p.state)mpStoreRemoteState(r,p.state);else if(p.state){const group=new THREE.Group();scene.add(group);const nr={group,parts:[],data:null,snapshots:[]};mpRemotePlayers.set(p.id,nr);mpStoreRemoteState(nr,p.state);}}
   }else if(packet.type==='peer-left'){mpRemoveRemote(packet.id);mpStatus('Игрок отключился. На сервере ещё '+mpRemotePlayers.size+' других игроков.');}
   else if(packet.type==='peer-data'&&packet.id&&packet.id!==mpLocalId){
     const d=packet.data;if(!d)return;
     if(d.type==='appearance'){mpApplyAppearance(d.parts,packet.id);}
-    else if(d.type==='state'){let r=mpRemotePlayers.get(packet.id);if(!r){r={group:new THREE.Group(),parts:[],data:null};scene.add(r.group);mpRemotePlayers.set(packet.id,r);}r.data=d;}
+    else if(d.type==='state'){let r=mpRemotePlayers.get(packet.id);if(!r){r={group:new THREE.Group(),parts:[],data:null,snapshots:[]};scene.add(r.group);mpRemotePlayers.set(packet.id,r);}mpStoreRemoteState(r,d);}
   }
+}
+function mpStoreRemoteState(r,data){
+  const t=performance.now();
+  r.data=data;
+  if(!Array.isArray(r.snapshots))r.snapshots=[];
+  r.snapshots.push({t,data});
+  // Достаточно нескольких снимков для интерполяции с небольшим сетевым запасом.
+  while(r.snapshots.length>6)r.snapshots.shift();
+}
+function mpGetInterpolatedParts(r,now){
+  const snaps=r.snapshots;
+  if(!snaps||!snaps.length)return r.data?.parts||[];
+  const target=now-MP_INTERPOLATION_DELAY;
+  let a=snaps[0],b=snaps[snaps.length-1];
+  if(target<=a.t)return a.data.parts||[];
+  for(let i=1;i<snaps.length;i++){if(snaps[i].t>=target){a=snaps[i-1];b=snaps[i];break;}}
+  const ap=a.data.parts||[],bp=b.data.parts||[];
+  if(a===b||b.t<=a.t)return bp;
+  const alpha=Math.max(0,Math.min(1,(target-a.t)/(b.t-a.t)));
+  const count=Math.min(ap.length,bp.length),out=new Array(count);
+  for(let i=0;i<count;i++){
+    const pa=ap[i],pb=bp[i];
+    if(!pa||!pb||!Array.isArray(pa.m)||!Array.isArray(pb.m)||pa.m.length!==16||pb.m.length!==16){out[i]=pb||pa;continue;}
+    const m=new Array(16);for(let j=0;j<16;j++)m[j]=pa.m[j]+(pb.m[j]-pa.m[j])*alpha;
+    out[i]={...pb,m};
+    // Плавно меняем ткань/плащ, если у объекта есть деформируемая геометрия.
+    for(const key of ['clothPos','clothCol'])if(Array.isArray(pa[key])&&Array.isArray(pb[key])&&pa[key].length===pb[key].length){const arr=new Array(pb[key].length);for(let j=0;j<arr.length;j++)arr[j]=pa[key][j]+(pb[key][j]-pa[key][j])*alpha;out[i][key]=arr;}
+  }
+  return out;
 }
 function mpConnectServer(){
   if(mpConn&&(mpConn.readyState===WebSocket.OPEN||mpConn.readyState===WebSocket.CONNECTING)){mpStatus('Подключение к общему серверу…');return;}
@@ -2454,6 +2416,7 @@ $('mpBack').addEventListener('click',()=>showScreen('main'));
 $('mmMulti').addEventListener('click',()=>{showScreen('multiplayer');paused=true;mpConnectServer();});
 function mpResolvePlayerCollision(remote,dt){
   const clamp01=(v)=>Math.max(0,Math.min(1,v));
+  // Стандартный персонаж: его игровой прямоугольный хитбокс.
   const localBox=mode!==PHYS,remoteBox=!remote.phys||!Array.isArray(remote.bodies);
   if(localBox&&remoteBox){
     const w=(HW+(Number.isFinite(remote.bodyW)?remote.bodyW:HW));
@@ -2493,6 +2456,8 @@ function mpResolvePlayerCollision(remote,dt){
     }
     return;
   }
+  // Обычный управляемый персонаж против сегментов ragdoll: столкновение по телу,
+  // с вертикальным разделением, чтобы можно было запрыгнуть на другого игрока.
   const left=C.x-HW,right=C.x+HW,bottom=C.by,top=C.by+BODY_H;
   for(const b of remoteBodies){
     const cb=Math.cos(b.a||0),sb=Math.sin(b.a||0);
@@ -2518,7 +2483,7 @@ function mpUpdate(dt,now){
     const bodies=mode===PHYS?BD.map(b=>({x:b.x,y:b.y,a:b.a,vx:b.vx,vy:b.vy,w:b.w,m:b.m,I:b.I,circ:b.circ.map(c=>[c[0],c[1],c[2]])})):null;
     try{mpConn.send(JSON.stringify({type:'state',x,y,face,phys:mode===PHYS,angle:mode===PHYS?BD[0].a:0,vx:mode===PHYS?BD[0].vx:C.vx,vy:mode===PHYS?BD[0].vy:C.vy,by:C.by,bodyH:BODY_H,bodyW:HW,bodies,parts,name:'Игрок'}));}catch(_){}
   }
-  for(const [id,r] of mpRemotePlayers){const d=r.data;if(!d)continue;if(r.parts.length&&Array.isArray(d.parts)){const n=Math.min(d.parts.length,r.parts.length);for(let i=0;i<n;i++){const part=d.parts[i],obj=r.parts[i];if(part&&Array.isArray(part.m)&&part.m.length===16){obj.matrix.fromArray(part.m);obj.visible=!!part.v;const mats=Array.isArray(obj.material)?obj.material:[obj.material];for(const mat of mats){if(part.c!==null&&mat.color)mat.color.setHex(part.c);if(Number.isFinite(part.o))mat.opacity=part.o;}if(Array.isArray(part.clothPos)&&obj.geometry.attributes.position&&part.clothPos.length===obj.geometry.attributes.position.array.length){obj.geometry.attributes.position.array.set(part.clothPos);obj.geometry.attributes.position.needsUpdate=true;obj.geometry.computeVertexNormals();}if(Array.isArray(part.clothCol)&&obj.geometry.attributes.color&&part.clothCol.length===obj.geometry.attributes.color.array.length){obj.geometry.attributes.color.array.set(part.clothCol);obj.geometry.attributes.color.needsUpdate=true;}}}}
+  for(const [id,r] of mpRemotePlayers){const d=r.data;if(!d)continue;const renderParts=mpGetInterpolatedParts(r,now);if(r.parts.length&&Array.isArray(renderParts)){const n=Math.min(renderParts.length,r.parts.length);for(let i=0;i<n;i++){const part=renderParts[i],obj=r.parts[i];if(part&&Array.isArray(part.m)&&part.m.length===16){obj.matrix.fromArray(part.m);obj.visible=!!part.v;const mats=Array.isArray(obj.material)?obj.material:[obj.material];for(const mat of mats){if(part.c!==null&&mat.color)mat.color.setHex(part.c);if(Number.isFinite(part.o))mat.opacity=part.o;}if(Array.isArray(part.clothPos)&&obj.geometry.attributes.position&&part.clothPos.length===obj.geometry.attributes.position.array.length){obj.geometry.attributes.position.array.set(part.clothPos);obj.geometry.attributes.position.needsUpdate=true;obj.geometry.computeVertexNormals();}if(Array.isArray(part.clothCol)&&obj.geometry.attributes.color&&part.clothCol.length===obj.geometry.attributes.color.array.length){obj.geometry.attributes.color.array.set(part.clothCol);obj.geometry.attributes.color.needsUpdate=true;}}}}
     mpResolvePlayerCollision(d,dt);
   }
 }
@@ -2744,29 +2709,6 @@ function frame(now){
     const fx=uy*face,fy=-ux*face;
     hair.position.set(X[HEAD]+ux*.06-fx*.05,Y[HEAD]+uy*.06-fy*.05,0);
     eye.position.set(X[HEAD]+fx*.19+ux*.03,Y[HEAD]+fy*.19+uy*.03,.11);
-    // лицо смайлика
-    if(smileyActive){
-      eye.visible=true;
-      eye.material.color.setHex(0x111111);
-      eye.scale.set(.05,.07,.05);
-      const ex2 = X[HEAD]+fx*.11+ux*.03, ey2=Y[HEAD]+fy*.11+uy*.03;
-      smileyEye.position.set(ex2,ey2,.11);
-      smileyEye.visible=true;
-      for(let k=0;k<smileyMouth.length;k++){
-        const t=k/(smileyMouth.length-1);
-        const ang=Math.PI*(0.15+t*0.7);
-        const rx=Math.cos(ang)*.13, ry=-Math.sin(ang)*.11;
-        const wx=X[HEAD]+fx*rx+ux*ry*0.6;
-        const wy=Y[HEAD]+fy*rx+uy*ry*0.6;
-        const mm=smileyMouth[k];
-        mm.position.set(wx,wy,.12);
-        mm.rotation.z=Math.atan2(fy,fx)-ang;
-        mm.visible=true;
-      }
-    } else {
-      smileyEye.visible=false;
-      for(const m of smileyMouth)m.visible=false;
-    }
     const want=(inShop&&previewHat!==null)?previewHat:curHat;
     if(want!==hatShown)buildHat(want);
     hatOuter.visible=(want!=='none');
