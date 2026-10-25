@@ -405,6 +405,7 @@ function startBlend(dur){
   blend.t=0;blend.dur=dur;
 }
 function animate(dt){
+  turnCooldown=Math.max(0,turnCooldown-dt);
   if(mode===PHYS){syncPoints();return;}
   const spd=Math.abs(C.vx);
   walkAmt+=((C.onGround?Math.min(1,spd/2.5):0)-walkAmt)*Math.min(1,dt*10);
@@ -2127,9 +2128,23 @@ function saltoPress(){
   }
   if(st.jump&&getupT<=0)tryJump(8.6,2.2,true);
 }
+let turnCooldown=0;
 function doTurn(){
-  if(paused||mode!==CHAR||getupT>0)return;
-  face=-face;startBlend(.12);
+  if(paused||getupT>0||turnCooldown>0)return;
+  turnCooldown=.18;
+  // Одна кнопка и одна логика поворота во всех состояниях.
+  // На земле разворачиваем направление плавно, а в воздухе/воде
+  // дополнительно передаём вращение физической модели.
+  face=-face;
+  startBlend(.28);
+  if(mode===PHYS){
+    // Поворот задаёт вращение суставам/телу, но не добавляет боковой
+    // скорости каждой части тела: spinAll() раньше толкал конечности
+    // по касательной и мог резко отправить персонажа назад.
+    const turnW=2.0*(face||1);
+    for(const b of BD)b.w+=turnW;
+    spun=true;
+  }
 }
 function actionDown(a,src){
   src[a]=true;
