@@ -959,7 +959,7 @@ function clearWorld(){
   bars.length=0;
   for(const o of arenaObjs)scene.remove(o);
   arenaObjs.length=0;
-  water=null;waterUni=null;lakeBuoys=[];ripples.length=0;
+  water=null;waterUni=null;lakeBuoys=[];bathSmoke=[];ripples.length=0;
 }
 const poleM=new THREE.MeshPhongMaterial({color:0xd5dae0,shininess:80});
 const patchM=new THREE.MeshLambertMaterial({color:0x9c9482});
@@ -1020,7 +1020,7 @@ function buildArena(){
     m.position.set((Math.random()-.5)*.6,.8+Math.random()*8.8,3.02);addObj(m);
   }
 }
-let mapSel=store.get('pk_map','arena');if(mapSel!=='custom'&&mapSel!=='city'&&mapSel!=='lake')mapSel='arena';
+let mapSel=store.get('pk_map','arena');if(!['custom','city','lake','bath'].includes(mapSel))mapSel='arena';
 let customMap=store.get('pk_cmap',null);
 if(!customMap||!Array.isArray(customMap.plats)||!Array.isArray(customMap.bars)||!Array.isArray(customMap.start))customMap={plats:[],bars:[],start:[0,0]};
 let customVer=0,builtMap=null,builtVer=-1;
@@ -1381,9 +1381,87 @@ function buildLake(){
 }
 
 
+/* ---------- карта «Баня с дымком» ---------- */
+let bathSmoke=[];
+function buildBath(){
+  const wood=new THREE.MeshLambertMaterial({color:0x8b512b});
+  const woodLight=new THREE.MeshLambertMaterial({color:0xb87942});
+  const darkWood=new THREE.MeshLambertMaterial({color:0x57331f});
+  const stone=new THREE.MeshLambertMaterial({color:0x777b80});
+  const roofM=new THREE.MeshLambertMaterial({color:0x3f464d});
+  const glass=new THREE.MeshLambertMaterial({color:0x78b8d6,emissive:0x163746});
+  const rail=new Batch();
+  bathSmoke=[];
+  // Земля и баня с открытым фасадом: внутри видно парилку, а не сплошную коробку
+  mkPlat(-300,300,-12,0,'floor',100);
+  const wallMat=new THREE.MeshLambertMaterial({color:0x754321});
+  const insideMat=new THREE.MeshLambertMaterial({color:0xc18a51});
+  const darkInside=new THREE.MeshLambertMaterial({color:0x4b2b1b});
+  const addBox=(w,h,d,x,y,z,mat)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);addObj(m);return m;};
+  // Пол парилки и задняя/боковые стены — только визуальные меши, без невидимого коллайдера
+  addBox(9.8,.22,5.8,0,.08,0,insideMat);
+  addBox(9.8,5.0,.22,0,2.6,-2.85,wallMat);
+  addBox(.22,5.0,5.8,-4.9,2.6,0,wallMat);
+  addBox(.22,5.0,5.8,4.9,2.6,0,wallMat);
+  // Фасад без декоративных брёвен — открытый проём, чтобы интерьер был виден
+  // Вход без дверной рамы: проём полностью открыт
+  // Внутри: полки-лавки, печь-каменка, ведро, ковш и тёплый свет
+  addBox(3.4,.22,.72,-2.65,1.25,-1.55,darkInside);
+  addBox(3.4,.18,.72,-2.65,1.55,-1.55,woodLight);
+  addBox(2.6,.22,.68,2.35,.82,-1.7,darkInside);
+  addBox(2.6,.18,.68,2.35,1.1,-1.7,woodLight);
+  addBox(1.25,1.35,1.1,1.1,.78,-.95,stone);
+  for(let i=0;i<7;i++){
+    const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.22+(i%3)*.035,0),stone);
+    rock.position.set(.65+(i%4)*.28,1.55+Math.floor(i/4)*.16,-.95+(i%2)*.22);addObj(rock);
+  }
+  const bucket=new THREE.Mesh(new THREE.CylinderGeometry(.22,.17,.42,10),darkInside);bucket.position.set(-.95,.34,1.05);addObj(bucket);
+  const ladle=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.62,6),woodLight);ladle.position.set(-.65,.62,1.05);ladle.rotation.z=-.65;addObj(ladle);
+  const warmLight=new THREE.PointLight(0xffa44d,1.15,11);warmLight.position.set(0,3.3,-.5);addObj(warmLight);
+  // Одна ровная плоская крыша вместо двускатной
+  const flatRoof=new THREE.Mesh(new THREE.BoxGeometry(10.4,.28,7.6),roofM);flatRoof.position.set(0,5.32,0);addObj(flatRoof);
+  // Труба и каменка
+  mkPlat(2.7,3.35,5.3,7.6,null,3,[stone,stone,stone,stone,stone,stone]);
+  mkPlat(-1.8,1.6,.1,1.7,null,3,[stone,stone,stone,stone,stone,stone]);
+  // камни у входа и ступеньки-паркур
+  mkPlat(-2.2,2.2,-.4,0,null,4,[stone,stone,stone,stone,stone,stone]);
+  mkPlat(6,8,1.2,1.5,'column',4);mkPlat(10,12,2.8,3.1,'column',4);
+  mkPlat(14,16,4.5,4.8,'column',4);mkPlat(18,20,6.4,6.7,'column',4);
+  addFreeBar(7,4.2);addFreeBar(11,5.5);addFreeBar(15,7.1);addFreeBar(19,8.8);
+  // ограда вокруг площадки без поленницы
+  for(let x=-10;x<=-6;x+=1){rail.box(x,.55,-1.8,.08,1.1,.08);}
+  rail.box(-8,.9,-1.8,4.2,.08,.08);rail.flush(new THREE.MeshLambertMaterial({color:0x654022}));
+  // Анимированный дымок над трубой
+  const puffGeo=new THREE.SphereGeometry(1,10,8);
+  for(let i=0;i<7;i++){
+    const m=new THREE.Mesh(puffGeo,new THREE.MeshBasicMaterial({color:i%2?0xe3e6e8:0xffffff,transparent:true,opacity:.38,depthWrite:false}));
+    const sc=.22+(i%3)*.07;m.scale.set(sc,sc*1.15,sc);
+    const baseY=7.8+i*.48;m.position.set(3.02,baseY,0);addObj(m);
+    bathSmoke.push({m,baseY,phase:i*.82,sc});
+  }
+  // немного берёз и кустов вокруг
+  for(const x of [-15,24,29]){
+    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.18,.24,4,7),new THREE.MeshLambertMaterial({color:0xe5e0d2}));trunk.position.set(x,2,-2);addObj(trunk);
+    for(let j=0;j<3;j++){
+      const leaf=new THREE.Mesh(new THREE.SphereGeometry(1.3-j*.18,8,7),new THREE.MeshLambertMaterial({color:j===1?0x477c39:0x5b9144}));
+      leaf.position.set(x+(j-1)*.45,4.3+j*.65,-2);addObj(leaf);
+    }
+  }
+}
+function updateBathSmoke(t){
+  for(const p of bathSmoke){
+    p.m.position.y=p.baseY+Math.sin(t*1.35+p.phase)*.18+((t*.55+p.phase)%2.4)*.24;
+    p.m.position.x=3.02+Math.sin(t*.9+p.phase)*.28;
+    const f=((t*.55+p.phase)%2.4)/2.4;
+    p.m.material.opacity=.42*(1-f);
+    const sc=p.sc*(1+f*.8);p.m.scale.set(sc,sc*1.15,sc);
+  }
+}
+
+
 function buildWorld(){
   clearWorld();
-  if(mapSel==='custom')buildCustom();else if(mapSel==='city')buildCity();else if(mapSel==='lake')buildLake();else buildArena();
+  if(mapSel==='custom')buildCustom();else if(mapSel==='city')buildCity();else if(mapSel==='lake')buildLake();else if(mapSel==='bath')buildBath();else buildArena();
   builtMap=mapSel;builtVer=customVer;
 }
 function ensureWorld(){if(builtMap!==mapSel||builtVer!==customVer)buildWorld();}
@@ -1399,7 +1477,8 @@ function placeAt(x,by){
 const SPAWNS=['Земля','Левый турник','Правый турник','Левый шест','Правый шест','Верх колонны','Случайно'];
 const SPAWN_NAMES={
   city:['Улица','Штанга 1','Штанга 2','Штанга 3','Штанга 4','Крыша','Случайно'],
-  lake:['Вершина горы','Уступ 14 м','Уступ 7 м','Вышка 15 м','Вышка 10 м','Остров','Случайно']
+  lake:['Вершина горы','Уступ 14 м','Уступ 7 м','Вышка 15 м','Вышка 10 м','Остров','Случайно'],
+  bath:['У входа','Ступенька 1','Ступенька 2','Ступенька 3','Ступенька 4','Крыша','Случайно']
 };
 function spawnName(){return (SPAWN_NAMES[mapSel]||SPAWNS)[spIdx];}
 function nearestBar(poleX,yy){
@@ -1452,6 +1531,11 @@ function spawn(){
     else if(k===5){face=1;placeAt(ci.roof.x,ci.roof.by);}
     if(k===0){face=1;placeAt(ci.ground.x,ci.ground.by);}
     camX=X[PEL]+2.2*face;camY=Y[PEL]+1;return;
+  }
+  if(mapSel==='bath'){
+    let k=spIdx;if(k===6)k=Math.floor(Math.random()*6);
+    const spots=[[-4,0],[7,1.5],[11,3.1],[15,4.8],[19,6.7],[0,5.2]];
+    face=1;placeAt(spots[k][0],spots[k][1]);camX=X[PEL]+2.2*face;camY=Y[PEL]+1;return;
   }
   let k=spIdx;
   if(k===6)k=Math.floor(Math.random()*6);
@@ -2358,9 +2442,9 @@ function refreshSettings(){
   $('sRestart').style.display=g?'block':'none';
   $('sHome').style.display=g?'block':'none';
 }
-const MAPNAMES={arena:'Арена',city:'Город',lake:'Озеро',custom:'Моя карта'};
+const MAPNAMES={arena:'Арена',city:'Город',lake:'Озеро',bath:'Баня (с дымком)',custom:'Моя карта'};
 function nextMap(){
-  const o=['arena','city','lake','custom'];
+  const o=['arena','city','lake','bath','custom'];
   mapSel=o[(o.indexOf(mapSel)+1)%o.length];store.set('pk_map',mapSel);
 }
 function updateMainInfo(){
@@ -2759,6 +2843,7 @@ function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;
   if(toastT>0){toastT-=dt;if(toastT<=0)$('toast').style.opacity=0;}
   updateWater(dt);
+  if(mapSel==='bath')updateBathSmoke(now/1000);
   if(replayPlaying){
     if(replayIndex>=replayFrames.length){replayPlaying=false;replayIndex=0;}
     else {applyReplayFrame(replayFrames[replayIndex++]);if(replayIndex%60===0)refreshReplayInfo();}
