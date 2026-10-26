@@ -1602,6 +1602,7 @@ function applySkin(id){
     }
   }
   if(typeof eye!=='undefined')eye.visible=!s.secret;
+  if(typeof mpRefreshLocalParts==='function')mpRefreshLocalParts();
 }
 function hexCss(c){return '#'+(c|0x1000000).toString(16).slice(1);}
 function swatches(s){return '<div class="sw"><i style="background:'+hexCss(s.shirt)+'"></i><i style="background:'+hexCss(s.pants)+'"></i><i style="background:'+hexCss(s.skin)+'"></i><i style="background:'+hexCss(s.shoe)+'"></i></div>';}
@@ -2436,7 +2437,7 @@ $('sRestart').addEventListener('click',()=>{newGame();hideScreens();paused=false
 $('sHome').addEventListener('click',goMain);
 
 /* ---------- Общий сетевой сервер (WebSocket) ---------- */
-let mpConn=null,mpLastSend=0,mpLocalParts=[],mpLocalId=null;
+let mpConn=null,mpLastSend=0,mpLocalParts=[],mpLocalId=null,mpLocalAppearanceSignature='';
 const MP_INTERPOLATION_DELAY=90; // запас времени для плавного отображения между сетевыми пакетами
 const mpRemotePlayers=new Map();
 function mpStatus(t){const el=$('mpStatus');if(el)el.textContent=t;}
@@ -2453,15 +2454,15 @@ function mpGetLocalParts(){
   return sources;
 }
 function mpGeometryPacket(g){const attrs={};for(const [name,a] of Object.entries(g.attributes))attrs[name]={itemSize:a.itemSize,normalized:!!a.normalized,array:Array.from(a.array)};return {attrs,index:g.index?Array.from(g.index.array):null};}
-function mpMaterialPacket(src){const m=Array.isArray(src.material)?src.material[0]:src.material;return {color:m&&m.color?m.color.getHex():0xffffff,opacity:m&&Number.isFinite(m.opacity)?m.opacity:1,transparent:!!(m&&m.transparent),side:m&&m.side,kind:m&&m.isMeshBasicMaterial?'basic':'phong',vertexColors:!!(m&&m.vertexColors),depthWrite:m?m.depthWrite:true,shininess:m&&Number.isFinite(m.shininess)?m.shininess:30};}
+function mpMaterialPacket(src){const m=Array.isArray(src.material)?src.material[0]:src.material;return {color:m&&m.color?m.color.getHex():0xffffff,opacity:m&&Number.isFinite(m.opacity)?m.opacity:1,transparent:!!(m&&m.transparent),side:m&&m.side,kind:m&&m.isMeshBasicMaterial?'basic':'phong',vertexColors:!!(m&&m.vertexColors),depthWrite:m?m.depthWrite:true,shininess:m&&Number.isFinite(m.shininess)?m.shininess:30,faceTexture:src===headJoint&&!!(m&&m.map===cheekFaceTex)};}
 function mpRefreshLocalParts(){
-  const sources=mpGetLocalParts();const changed=sources.length!==mpLocalParts.length||sources.some((o,i)=>o!==mpLocalParts[i]);mpLocalParts=sources;
+  const sources=mpGetLocalParts();const signature=sources.map(src=>src===headJoint&&src.material&&src.material.map===cheekFaceTex?'face':'plain').join(',');const changed=sources.length!==mpLocalParts.length||sources.some((o,i)=>o!==mpLocalParts[i])||signature!==mpLocalAppearanceSignature;mpLocalParts=sources;mpLocalAppearanceSignature=signature;
   if(changed&&mpConn&&mpConn.readyState===WebSocket.OPEN){const parts=sources.map(src=>({g:mpGeometryPacket(src.geometry),mat:mpMaterialPacket(src)}));try{mpConn.send(JSON.stringify({type:'appearance',parts}));}catch(_){} }
 }
 function mpApplyAppearance(data,id){
   if(!Array.isArray(data)||!data.length||!id||id===mpLocalId)return;
   mpRemoveRemote(id);const group=new THREE.Group(),parts=[];
-  for(const p of data){const g=new THREE.BufferGeometry();for(const [name,a] of Object.entries(p.g?.attrs||{}))g.setAttribute(name,new THREE.Float32BufferAttribute(a.array,a.itemSize,a.normalized));if(p.g?.index)g.setIndex(p.g.index);if(g.attributes.position)g.computeBoundingSphere();const d=p.mat||{};const opts={color:d.color??0xffffff,opacity:d.opacity??1,transparent:!!d.transparent,side:d.side??THREE.DoubleSide,vertexColors:!!d.vertexColors,depthWrite:d.depthWrite!==false,shininess:d.shininess??30};const mat=d.kind==='basic'?new THREE.MeshBasicMaterial(opts):new THREE.MeshPhongMaterial(opts);const mesh=new THREE.Mesh(g,mat);mesh.matrixAutoUpdate=false;group.add(mesh);parts.push(mesh);}
+  for(const p of data){const g=new THREE.BufferGeometry();for(const [name,a] of Object.entries(p.g?.attrs||{}))g.setAttribute(name,new THREE.Float32BufferAttribute(a.array,a.itemSize,a.normalized));if(p.g?.index)g.setIndex(p.g.index);if(g.attributes.position)g.computeBoundingSphere();const d=p.mat||{};const opts={color:d.color??0xffffff,opacity:d.opacity??1,transparent:!!d.transparent,side:d.side??THREE.DoubleSide,vertexColors:!!d.vertexColors,depthWrite:d.depthWrite!==false,shininess:d.shininess??30};if(d.faceTexture){opts.map=cheekFaceTex;opts.color=0xffdf00;}const mat=d.kind==='basic'?new THREE.MeshBasicMaterial(opts):new THREE.MeshPhongMaterial(opts);const mesh=new THREE.Mesh(g,mat);mesh.matrixAutoUpdate=false;group.add(mesh);parts.push(mesh);}
   scene.add(group);mpRemotePlayers.set(id,{group,parts,data:null,snapshots:[]});
 }
 function mpHandlePacket(packet){
