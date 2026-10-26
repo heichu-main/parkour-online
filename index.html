@@ -2511,7 +2511,14 @@ function mpConnectServer(){
   mpClean();if(!('WebSocket' in window)){mpStatus('Этот браузер не поддерживает WebSocket.');return;}
   const proto=location.protocol==='https:'?'wss:':'ws:';const url=proto+'//'+location.host+'/ws';mpStatus('Подключаемся к общему серверу…');
   try{mpConn=new WebSocket(url);}catch(e){mpStatus('Не удалось создать подключение.');return;}
-  mpConn.addEventListener('open',()=>mpStatus('Соединение установлено. Загружаем игроков…'));
+  mpConn.addEventListener('open',()=>{
+    mpStatus('Соединение установлено. Загружаем игроков…');
+    // Send the current appearance immediately on connection, without requiring the player to reselect the skin.
+    mpRefreshLocalParts();
+    const sources=mpGetLocalParts();
+    const parts=sources.map(src=>({g:mpGeometryPacket(src.geometry),mat:mpMaterialPacket(src)}));
+    try{mpConn.send(JSON.stringify({type:'appearance',parts}));}catch(_){}
+  });
   mpConn.addEventListener('message',ev=>{try{mpHandlePacket(JSON.parse(ev.data));}catch(e){console.warn('Bad multiplayer packet',e);}});
   mpConn.addEventListener('close',()=>{mpStatus('Нет соединения с сервером. Пробуем подключиться снова…');setTimeout(()=>{if(!mpConn||mpConn.readyState===WebSocket.CLOSED)mpConnectServer();},4000);});
   mpConn.addEventListener('error',()=>mpStatus('Ошибка соединения. Сервер ещё запускается или недоступен.'));
