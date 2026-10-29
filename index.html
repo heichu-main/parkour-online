@@ -1231,7 +1231,7 @@ const WF_TOP=WGLSL+[
 ' gl_FragColor=vec4(col,.84);',
 '}'].join('\n');
 let waterUni=null;
-function makeWater(x0,x1,y,bottom){
+function makeWater(x0,x1,y,bottom,spanZ){
   water={x0:x0,x1:x1,y:y,bottom:bottom};
   const rips=[];for(let i=0;i<6;i++)rips.push(new THREE.Vector4(0,0,0,0));
   waterUni={uTime:{value:0},uRip:{value:rips},uBack:{value:0}};
@@ -1243,7 +1243,7 @@ function makeWater(x0,x1,y,bottom){
   const bg=new THREE.PlaneGeometry(w,h,Math.max(8,Math.round(w*2)),1);bg.translate(0,-h/2,0);
   const back=new THREE.Mesh(bg,new THREE.ShaderMaterial({uniforms:uniBack,vertexShader:WV_FRONT,fragmentShader:WF_FRONT,side:THREE.DoubleSide}));
   back.position.set(cx,y,-3.2);back.renderOrder=0;addObj(back);
-  const tg=new THREE.PlaneGeometry(w,40,Math.max(8,Math.round(w*2)),1);tg.rotateX(-Math.PI/2);
+  const tg=new THREE.PlaneGeometry(w,spanZ||40,Math.max(8,Math.round(w*2)),1);tg.rotateX(-Math.PI/2);
   const top=new THREE.Mesh(tg,new THREE.ShaderMaterial({uniforms:waterUni,vertexShader:WV_TOP,fragmentShader:WF_TOP,transparent:true,depthWrite:false,side:THREE.DoubleSide}));
   top.position.set(cx,y,-17);top.renderOrder=2;addObj(top);
 }
@@ -1388,46 +1388,65 @@ function buildBath(){
   const woodLight=new THREE.MeshLambertMaterial({color:0xb87942});
   const darkWood=new THREE.MeshLambertMaterial({color:0x57331f});
   const stone=new THREE.MeshLambertMaterial({color:0x777b80});
-  const roofM=new THREE.MeshLambertMaterial({color:0x3f464d});
+  const roofM=new THREE.MeshLambertMaterial({color:0x80603f,side:THREE.DoubleSide});
   const glass=new THREE.MeshLambertMaterial({color:0x78b8d6,emissive:0x163746});
   const rail=new Batch();
   bathSmoke=[];
-  // Земля и баня с открытым фасадом: внутри видно парилку, а не сплошную коробку
+  // Одна парилка по референсу: деревянная комната, две полки и цветные тазики. Бассейн удалён.
   mkPlat(-300,300,-12,0,'floor',100);
-  const wallMat=new THREE.MeshLambertMaterial({color:0x754321});
-  const insideMat=new THREE.MeshLambertMaterial({color:0xc18a51});
-  const darkInside=new THREE.MeshLambertMaterial({color:0x4b2b1b});
+  const wallMat=new THREE.MeshLambertMaterial({color:0x927653});
+  const insideMat=new THREE.MeshLambertMaterial({color:0x6f5236});
+  const darkInside=new THREE.MeshLambertMaterial({color:0x4b3322});
+  const saunaWood=new THREE.MeshLambertMaterial({color:0xc2a47d});
   const addBox=(w,h,d,x,y,z,mat)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);addObj(m);return m;};
-  // Пол парилки и задняя/боковые стены — только визуальные меши, без невидимого коллайдера
+  // Single room, open front so the interior is visible.
   addBox(9.8,.22,5.8,0,.08,0,insideMat);
-  addBox(9.8,5.0,.22,0,2.6,-2.85,wallMat);
+  addBox(9.8,5.0,.22,0,2.6,-2.85,saunaWood);
   addBox(.22,5.0,5.8,-4.9,2.6,0,wallMat);
   addBox(.22,5.0,5.8,4.9,2.6,0,wallMat);
-  // Фасад без декоративных брёвен — открытый проём, чтобы интерьер был виден
-  // Вход без дверной рамы: проём полностью открыт
-  // Внутри: полки-лавки, печь-каменка, ведро, ковш и тёплый свет
-  addBox(3.4,.22,.72,-2.65,1.25,-1.55,darkInside);
-  addBox(3.4,.18,.72,-2.65,1.55,-1.55,woodLight);
-  addBox(2.6,.22,.68,2.35,.82,-1.7,darkInside);
-  addBox(2.6,.18,.68,2.35,1.1,-1.7,woodLight);
-  addBox(1.25,1.35,1.1,1.1,.78,-.95,stone);
-  for(let i=0;i<7;i++){
-    const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.22+(i%3)*.035,0),stone);
-    rock.position.set(.65+(i%4)*.28,1.55+Math.floor(i/4)*.16,-.95+(i%2)*.22);addObj(rock);
+  // Vertical boards on the back wall, like the reference photo.
+  for(let x=-4.55;x<=4.55;x+=.29){addBox(.035,4.75,.035,x,2.58,-2.69,woodLight);}
+  // Long upper shelf and lower shelf, with chunky wooden supports.
+  addBox(8.5,.20,.95,0,1.48,-1.72,saunaWood);
+  addBox(8.5,.12,.95,0,1.36,-1.72,woodLight);
+  addBox(8.1,.18,.90,0,.67,-1.72,saunaWood);
+  addBox(8.1,.12,.90,0,.55,-1.72,woodLight);
+  for(const x of [-3.5,-1.2,1.2,3.5]){
+    addBox(.20,1.05,.22,x,.86,-1.72,darkInside);
+    addBox(.20,.65,.22,x,.34,-1.72,darkInside);
   }
-  const bucket=new THREE.Mesh(new THREE.CylinderGeometry(.22,.17,.42,10),darkInside);bucket.position.set(-.95,.34,1.05);addObj(bucket);
-  const ladle=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.62,6),woodLight);ladle.position.set(-.65,.62,1.05);ladle.rotation.z=-.65;addObj(ladle);
-  const warmLight=new THREE.PointLight(0xffa44d,1.15,11);warmLight.position.set(0,3.3,-.5);addObj(warmLight);
-  // Одна ровная плоская крыша вместо двускатной
-  const flatRoof=new THREE.Mesh(new THREE.BoxGeometry(10.4,.28,7.6),roofM);flatRoof.position.set(0,5.32,0);addObj(flatRoof);
-  // Труба и каменка
-  mkPlat(2.7,3.35,5.3,7.6,null,3,[stone,stone,stone,stone,stone,stone]);
-  mkPlat(-1.8,1.6,.1,1.7,null,3,[stone,stone,stone,stone,stone,stone]);
+  // Four basins/buckets arranged on the shelves, matching the photo colours.
+  const basin=(x,y,z,color,rx=.48,rz=.38)=>{
+    const mat=new THREE.MeshLambertMaterial({color,side:THREE.DoubleSide});
+    const bowl=new THREE.Mesh(new THREE.CylinderGeometry(rx*.82,rx*.62,.25,20,1,true),mat);
+    bowl.position.set(x,y,z);addObj(bowl);
+    const bottom=new THREE.Mesh(new THREE.CylinderGeometry(rx*.62,rx*.62,.035,20),mat);bottom.position.set(x,y-.12,z);addObj(bottom);
+  };
+  basin(-2.75,1.72,-1.55,0x5930b4,.53,.43); // purple basin
+  basin(-.55,1.78,-1.55,0x087c75,.55,.44); // turquoise bucket
+  basin(-2.65,.91,-1.52,0x087653,.54,.42); // green basin
+  basin(-.95,.94,-1.48,0xd52b1e,.32,.28); // small red scoop/basin
+  // Plain wooden plank ceiling/roof, with collision retained.
+  const roofM2=new THREE.MeshLambertMaterial({color:0x8b6948,side:THREE.DoubleSide});
+  const roof=new THREE.Mesh(new THREE.BoxGeometry(10.4,.18,6.4),roofM2);roof.position.set(0,5.32,0);addObj(roof);
+  addCollider(-4.65,4.65,5.23,5.42,true);
+  // Chimney is decorative only; smoke rises above it.
+  addBox(.55,1.8,.55,3.7,6.0,-2.0,stone);
+  const warmLight=new THREE.PointLight(0xffc078,.75,12);warmLight.position.set(0,3.4,0);addObj(warmLight);
   // камни у входа и ступеньки-паркур
   mkPlat(-2.2,2.2,-.4,0,null,4,[stone,stone,stone,stone,stone,stone]);
-  mkPlat(6,8,1.2,1.5,'column',4);mkPlat(10,12,2.8,3.1,'column',4);
-  mkPlat(14,16,4.5,4.8,'column',4);mkPlat(18,20,6.4,6.7,'column',4);
-  addFreeBar(7,4.2);addFreeBar(11,5.5);addFreeBar(15,7.1);addFreeBar(19,8.8);
+  // Паркурная зона справа от парилки: отдельная полоса препятствий, не пересекающая комнату.
+  mkPlat(12.5,15.5,.35,.65,'column',3.2);
+  mkPlat(17,19,1.35,1.65,'column',3.2);
+  mkPlat(21.5,23.5,2.65,2.95,'column',3.2);
+  mkPlat(26,28,4.15,4.45,'column',3.2);
+  mkPlat(30.5,33,5.8,6.1,'column',3.2);
+  mkPlat(35,37.5,7.3,7.6,'column',3.2);
+  addFreeBar(14,3.4);addFreeBar(18,4.8);addFreeBar(22.5,6.1);addFreeBar(27,7.6);addFreeBar(31.7,9.1);addFreeBar(36,10.4);
+  // Низкие трамплины и боковые ступени для разнообразных прыжков.
+  mkPlat(15.5,16.8,.9,1.15,'column',2.6);
+  mkPlat(24,25.3,3.35,3.6,'column',2.6);
+  mkPlat(33.5,34.7,6.5,6.75,'column',2.6);
   // ограда вокруг площадки без поленницы
   for(let x=-10;x<=-6;x+=1){rail.box(x,.55,-1.8,.08,1.1,.08);}
   rail.box(-8,.9,-1.8,4.2,.08,.08);rail.flush(new THREE.MeshLambertMaterial({color:0x654022}));
@@ -1436,7 +1455,7 @@ function buildBath(){
   for(let i=0;i<7;i++){
     const m=new THREE.Mesh(puffGeo,new THREE.MeshBasicMaterial({color:i%2?0xe3e6e8:0xffffff,transparent:true,opacity:.38,depthWrite:false}));
     const sc=.22+(i%3)*.07;m.scale.set(sc,sc*1.15,sc);
-    const baseY=7.8+i*.48;m.position.set(3.02,baseY,0);addObj(m);
+    const baseY=7.8+i*.48;m.position.set(3.7,baseY,0);addObj(m);
     bathSmoke.push({m,baseY,phase:i*.82,sc});
   }
   // немного берёз и кустов вокруг
@@ -1451,7 +1470,7 @@ function buildBath(){
 function updateBathSmoke(t){
   for(const p of bathSmoke){
     p.m.position.y=p.baseY+Math.sin(t*1.35+p.phase)*.18+((t*.55+p.phase)%2.4)*.24;
-    p.m.position.x=3.02+Math.sin(t*.9+p.phase)*.28;
+    p.m.position.x=3.7+Math.sin(t*.9+p.phase)*.28;
     const f=((t*.55+p.phase)%2.4)/2.4;
     p.m.material.opacity=.42*(1-f);
     const sc=p.sc*(1+f*.8);p.m.scale.set(sc,sc*1.15,sc);
@@ -1661,7 +1680,7 @@ const SKINS=[
   {id:'ninja',name:'Ниндзя',price:60,skin:0xe3b08a,shirt:0x1c1c1c,pants:0x1c1c1c,shoe:0x111111,hair:0x111111},
   {id:'dummy',name:'Манекен',price:90,skin:0xb5772a,shirt:0xb5772a,pants:0xa06a24,shoe:0x8a5a1e,hair:0x6b4216},
   {id:'gold',name:'Золотой',price:150,skin:0xf3d27a,shirt:0xd4a017,pants:0x8a6d0b,shoe:0xffe082,hair:0x8a6d0b},
-  {id:'v3r1t1',name:'Секретный жёлтый',price:0,skin:0xffdf00,shirt:0xffdf00,pants:0xffdf00,shoe:0xffdf00,hair:0xffdf00,secret:true}
+  {id:'v3r1t1',name:'Verity',price:0,skin:store.get('pk_verity_color',0xffdf00),shirt:store.get('pk_verity_color',0xffdf00),pants:store.get('pk_verity_color',0xffdf00),shoe:store.get('pk_verity_color',0xffdf00),hair:store.get('pk_verity_color',0xffdf00),secret:true}
 ];
 let owned=null;
 let curSkin=store.get('pk_skin','classic');
@@ -1679,8 +1698,8 @@ function applySkin(id){
   if(typeof headJoint!=='undefined' && headJoint){
     if(s.secret){
       if(!headJoint.material.map || headJoint.material.map!==cheekFaceTex){
-        headJoint.material=new THREE.MeshBasicMaterial({color:0xffdf00,map:cheekFaceTex});
-      }
+        headJoint.material=new THREE.MeshBasicMaterial({color:s.skin,map:cheekFaceTex});
+      } else { headJoint.material.color.setHex(s.skin); }
     }else if(headJoint.material && headJoint.material.map===cheekFaceTex){
       headJoint.material=originalHeadMaterial;
     }
@@ -2180,6 +2199,7 @@ function renderSkins(){
     if(s.secret&&!store.get('pk_code_v3r1t1',0))continue;
     if(owned.indexOf(s.id)<0)continue;
     h+='<div class="card'+(curSkin===s.id?' sel':'')+'"><div class="nm">'+s.name+'</div>'+swatches(s)+
+      (s.secret?'<label style="display:block;margin:8px 0;font-size:14px">Цвет Verity <input type="color" data-verity-color value="'+hexCss(s.skin)+'" style="width:48px;height:30px;vertical-align:middle;border:0;background:transparent;padding:0"></label>':'')+
       '<button class="mbtn'+(curSkin===s.id?' sec':'')+'" data-skin="'+s.id+'">'+(curSkin===s.id?'Выбрано':'Выбрать')+'</button></div>';
   }
   $('skinList').innerHTML=h;
@@ -2188,6 +2208,19 @@ function selectSkin(id){
   if(owned.indexOf(id)<0)return;
   curSkin=id;applySkin(id);store.set('pk_skin',id);renderSkins();
 }
+$('skinList').addEventListener('input',e=>{
+  const t=e.target;
+  if(!t || !t.hasAttribute || !t.hasAttribute('data-verity-color'))return;
+  const hex=parseInt(String(t.value).replace('#',''),16);
+  if(!Number.isFinite(hex))return;
+  const s=SKINS.find(x=>x.id==='v3r1t1');
+  if(!s)return;
+  s.skin=s.shirt=s.pants=s.shoe=s.hair=hex;
+  store.set('pk_verity_color',hex);
+  if(curSkin==='v3r1t1')applySkin(curSkin);
+  const card=t.closest('.card');
+  if(card){const sw=card.querySelector('.sw');if(sw)sw.innerHTML='<i style="background:'+hexCss(hex)+'"></i><i style="background:'+hexCss(hex)+'"></i><i style="background:'+hexCss(hex)+'"></i><i style="background:'+hexCss(hex)+'"></i>';}
+});
 function delegate(el,attr,fn){
   el.addEventListener('click',e=>{
     let t=e.target;
@@ -2546,7 +2579,7 @@ function mpRefreshLocalParts(){
 function mpApplyAppearance(data,id){
   if(!Array.isArray(data)||!data.length||!id||id===mpLocalId)return;
   mpRemoveRemote(id);const group=new THREE.Group(),parts=[];
-  for(const p of data){const g=new THREE.BufferGeometry();for(const [name,a] of Object.entries(p.g?.attrs||{}))g.setAttribute(name,new THREE.Float32BufferAttribute(a.array,a.itemSize,a.normalized));if(p.g?.index)g.setIndex(p.g.index);if(g.attributes.position)g.computeBoundingSphere();const d=p.mat||{};const opts={color:d.color??0xffffff,opacity:d.opacity??1,transparent:!!d.transparent,side:d.side??THREE.DoubleSide,vertexColors:!!d.vertexColors,depthWrite:d.depthWrite!==false,shininess:d.shininess??30};if(d.faceTexture){opts.map=cheekFaceTex;opts.color=0xffdf00;}const mat=d.kind==='basic'?new THREE.MeshBasicMaterial(opts):new THREE.MeshPhongMaterial(opts);const mesh=new THREE.Mesh(g,mat);mesh.matrixAutoUpdate=false;group.add(mesh);parts.push(mesh);}
+  for(const p of data){const g=new THREE.BufferGeometry();for(const [name,a] of Object.entries(p.g?.attrs||{}))g.setAttribute(name,new THREE.Float32BufferAttribute(a.array,a.itemSize,a.normalized));if(p.g?.index)g.setIndex(p.g.index);if(g.attributes.position)g.computeBoundingSphere();const d=p.mat||{};const opts={color:d.color??0xffffff,opacity:d.opacity??1,transparent:!!d.transparent,side:d.side??THREE.DoubleSide,vertexColors:!!d.vertexColors,depthWrite:d.depthWrite!==false,shininess:d.shininess??30};if(d.faceTexture){opts.map=cheekFaceTex;opts.color=d.color??0xffffff;}const mat=d.kind==='basic'?new THREE.MeshBasicMaterial(opts):new THREE.MeshPhongMaterial(opts);const mesh=new THREE.Mesh(g,mat);mesh.matrixAutoUpdate=false;group.add(mesh);parts.push(mesh);}
   scene.add(group);mpRemotePlayers.set(id,{group,parts,data:null,snapshots:[]});
 }
 function mpHandlePacket(packet){
