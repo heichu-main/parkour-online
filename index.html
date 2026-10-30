@@ -46,7 +46,7 @@
   #bTurn{left:25.8%;top:84%;width:12%;height:14.3%;}
   #bSalto{right:.6%;top:1.7%;width:17.5%;height:31.4%;}
   #bStraight{right:.6%;top:34.3%;width:17.5%;height:31.4%;}
-  #bPike{right:.6%;top:66.9%;width:17.5%;height:31.4%;}
+  #bPike{right:.6%;top:74.8%;width:17.5%;height:23.5%;}
   #score{
     position:absolute;top:.8%;left:50%;transform:translateX(-50%);
     background:var(--lbl);color:#222;padding:.2em .7em;border-radius:4px;
@@ -71,6 +71,15 @@
     pointer-events:auto;cursor:pointer;
   }
   #ui.notouch #gear{display:flex;}
+  #headImpactFx{
+    position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;
+    background:radial-gradient(ellipse at center,transparent 38%,rgba(20,12,35,.12) 68%,rgba(18,8,28,.72) 115%),
+      linear-gradient(110deg,rgba(120,170,255,.10),rgba(255,255,255,.02),rgba(120,170,255,.10));
+    mix-blend-mode:multiply;transition:opacity .08s linear;
+  }
+  #headImpactFx::after{content:"";position:absolute;inset:0;background:rgba(150,190,255,.10);opacity:0;
+    animation:headPulse .9s ease-in-out infinite alternate;}
+  @keyframes headPulse{from{opacity:0}to{opacity:.75}}
   #toast{
     position:absolute;top:11%;left:50%;transform:translateX(-50%);background:rgba(190,20,20,.9);color:#fff;
     padding:.25em .9em;border-radius:8px;font-weight:800;font-size:min(4.4vh,3.4vw);letter-spacing:.06em;
@@ -98,6 +107,7 @@
   .mbtn:active{filter:brightness(1.2);}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 8px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 6px;}
   #hp{position:absolute;top:6.4%;left:50%;transform:translateX(-50%);width:15%;height:2.4vh;background:rgba(0,0,0,.4);border-radius:6px;overflow:hidden;pointer-events:none;}
   #hpFill{position:absolute;left:0;top:0;bottom:0;width:100%;background:linear-gradient(#e53935,#b71c1c);transition:width .25s;}
   #hp b{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:min(2.1vh,1.7vw);text-shadow:0 1px 2px #000;}
@@ -170,6 +180,7 @@
 <body>
 <div id="wrap">
   <div id="ui">
+    <div id="headImpactFx"></div>
     <div id="score">Высота: 0 м · сальто: 0</div>
     <div id="toast"></div>
     <div id="hp"><div id="hpFill"></div><b id="hpTxt">❤ 100</b></div>
@@ -215,6 +226,7 @@
         <button class="mbtn sec" id="sSpawn">Спавн: Земля</button>
         <button class="mbtn sec" id="sMap">Карта: Арена</button>
         <button class="mbtn sec" id="sTouch">Экранные кнопки: ВКЛ</button>
+        <button class="mbtn sec" id="sHeadFx">Эффекты ранений: ВКЛ</button>
         <button class="mbtn sec" id="sCtl">Управление</button>
         <button class="mbtn sec" id="sReplay">Реплей</button>
         <button class="mbtn sec" id="sHelp">Как играть</button>
@@ -268,7 +280,7 @@
   <div id="shop" class="screen" style="pointer-events:none">
     <div id="shopPanel" class="panel">
       <h2>МАГАЗИН</h2>
-      <div class="grid3"><button class="mbtn" id="shTabHats">Шляпы</button><button class="mbtn sec" id="shTabCapes">Плащи</button><button class="mbtn sec" id="shTabPants">Штаны</button></div>
+      <div class="grid4"><button class="mbtn" id="shTabHats">Шляпы</button><button class="mbtn sec" id="shTabCapes">Плащи</button><button class="mbtn sec" id="shTabPants">Штаны</button><button class="mbtn sec" id="shTabTops">Кофты</button></div>
       <div id="shopCoins">Монеты: 0</div>
       <div id="shopList"></div>
       <div class="grid2">
@@ -1762,6 +1774,7 @@ function buildHat(id){
 const CAPES=[
   {id:'none',name:'Без плаща',price:0},
   {id:'red',name:'Красный плащ',price:40,c1:0xd32f2f,c2:0x7f0000},
+  {id:'green',name:'Зелёный плащ',price:40,c1:0x2e7d32,c2:0x1b5e20},
   {id:'blue',name:'Синий плащ',price:40,c1:0x1e88e5,c2:0x0d2a66},
   {id:'black',name:'Чёрный плащ',price:70,c1:0x2b2b2b,c2:0x050505,trim:0xb71c1c},
   {id:'hero',name:'Плащ героя',price:90,c1:0xe53935,c2:0xb71c1c,trim:0xffd600},
@@ -1983,11 +1996,116 @@ function updatePants(want){
   pantsHip.rotation.z=Math.atan2(pantsTmp[3]-pantsTmp[1],pantsTmp[2]-pantsTmp[0])-Math.PI/2;
 }
 
+/* ---------- кофты и куртки 3D ---------- */
+const TOPS3=[
+  {id:'none',name:'Без кофты',price:0},
+  {id:'hoodie',name:'Худи серое',price:40,c:0x8c8f96,c2:0x5f626a,sh:8,rt:.176,sl:[.105,.1,.088],hood:true,pocket:true,strings:0xffffff,cuff:true,hem:true},
+  {id:'hoodieB',name:'Худи чёрное',price:55,c:0x17171c,c2:0xffffff,sh:14,rt:.18,sl:[.108,.104,.092],hood:true,pocket:true,strings:0xffffff,cuff:true,hem:true,logo:0xffffff},
+  {id:'bomber',name:'Бомбер',price:70,c:0x2f5f3f,c2:0xff6d00,sh:45,rt:.172,sl:[.105,.1,.09],zip:true,collar:'rib',cuff:true,hem:true,logo:0xff6d00},
+  {id:'denim',name:'Джинсовка',price:60,c:0x3f6fb0,c2:0xe9c46a,sh:10,rt:.168,sl:[.095,.09,.082],collar:'big',chestPockets:true,cuff:true,zip:true},
+  {id:'leather',name:'Кожанка',price:100,c:0x111114,c2:0xc8c8d0,sh:130,rt:.166,sl:[.092,.088,.082],zip:true,collar:'big',cuff:true,hem:true},
+  {id:'puffer',name:'Пуховик',price:90,c:0xe53935,c2:0xb71c1c,sh:50,rt:.205,sl:[.125,.12,.105],zip:true,collar:'rib',rings:true,cuff:true},
+  {id:'gold',name:'Золотая куртка',price:200,c:0xd4a017,c2:0x7a5c08,sh:120,rt:.186,sl:[.112,.108,.095],zip:true,collar:'big',cuff:true,hem:true,chain:true}
+];
+const topRoot=new THREE.Group();scene.add(topRoot);
+const topTorso=new THREE.Group(),topFront=new THREE.Group();
+topTorso.add(topFront);topRoot.add(topTorso);
+const topSleeves=[];
+for(let k=0;k<4;k++){const g=new THREE.Group();topRoot.add(g);topSleeves.push({g:g,main:null});}
+const topCaps=[];
+for(let k=0;k<2;k++){const m=new THREE.Mesh(sphGeo,new THREE.MeshPhongMaterial({color:0x888888}));m.visible=false;topRoot.add(m);topCaps.push(m);}
+let topShown='',topCur=null,topMain=null;
+function buildTop(id){
+  topShown=id;
+  clearGroup(topFront);
+  for(const ch of topTorso.children.slice())if(ch!==topFront){topTorso.remove(ch);if(ch.geometry&&ch.geometry.dispose)ch.geometry.dispose();if(ch.material&&ch.material.dispose)ch.material.dispose();}
+  for(const s of topSleeves){clearGroup(s.g);s.main=null;}
+  for(const m of topCaps){m.visible=false;if(m.material&&m.material.dispose)m.material.dispose();}
+  const def=TOPS3.find(t=>t.id===id);
+  topCur=(def&&def.id!=='none')?def:null;topMain=null;
+  if(!topCur)return;
+  const d=topCur,rt=d.rt;
+  const addT=(geo,col,sh,x,y,z,parent)=>{const m=new THREE.Mesh(geo,pm(col,sh,false));m.position.set(x,y,z);(parent||topTorso).add(m);return m;};
+  // корпус: +y локальной оси смотрит к тазу
+  topMain=new THREE.Mesh(new THREE.CylinderGeometry(rt*1.04,rt*.9,1,18),pm(d.c,d.sh,false));
+  topMain.position.y=.03;topTorso.add(topMain);
+  const nk=-.3,fr=rt*.82;   // шея (локальный y) и вынос вперёд
+  if(d.hem)addT(new THREE.CylinderGeometry(rt*1.05,rt*1.05,.06,18),d.c2,d.sh,0,.335,0);
+  if(d.collar==='rib')addT(new THREE.CylinderGeometry(.12,.125,.07,14),d.c2,d.sh,0,nk+.02,0);
+  if(d.collar==='big'){
+    addT(new THREE.CylinderGeometry(.135,.15,.09,14),d.c,d.sh,0,nk+.02,0);
+    addT(new THREE.BoxGeometry(.05,.1,.1),d.c2,d.sh,0,nk+.05,0,topFront).position.x=fr;
+  }
+  if(d.zip){const z=addT(new THREE.BoxGeometry(.014,.55,.016),0xd8d8d8,120,fr+.012,.02,0,topFront);}
+  if(d.pocket){
+    addT(new THREE.BoxGeometry(.07,.11,.25),d.c2,6,fr+.02,.12,0,topFront);
+  }
+  if(d.strings!==undefined){
+    addT(new THREE.BoxGeometry(.012,.15,.012),d.strings,20,fr+.01,nk+.12,.045,topFront);
+    addT(new THREE.BoxGeometry(.012,.15,.012),d.strings,20,fr+.01,nk+.12,-.045,topFront);
+  }
+  if(d.hood){
+    const h=new THREE.Mesh(sphGeo,pm(d.c,d.sh,false));h.scale.set(.1,.12,.17);h.position.set(-.13,nk-.01,0);topFront.add(h);
+    const hi=new THREE.Mesh(sphGeo,pm(d.c2,d.sh,false));hi.scale.set(.06,.09,.13);hi.position.set(-.1,nk+.0,0);topFront.add(hi);
+  }
+  if(d.chestPockets){
+    addT(new THREE.BoxGeometry(.09,.1,.012),d.c2,10,0,-.1,rt*1.0+.004);
+    addT(new THREE.BoxGeometry(.09,.1,.012),d.c2,10,0,.0,-(rt*1.0+.004));
+  }
+  if(d.logo!==undefined)addT(new THREE.BoxGeometry(.11,.07,.012),d.logo,40,0,-.08,rt*1.0+.005);
+  if(d.rings){for(const yy of [-.2,-.08,.04,.16,.28])addT(new THREE.CylinderGeometry(rt*1.045,rt*1.045,.028,18),d.c2,d.sh,0,yy,0);}
+  if(d.chain){
+    const tor=addT(new THREE.TorusGeometry(.125,.014,6,18),0xffd54f,130,0,nk+.07,0);tor.rotation.x=Math.PI/2;
+    addT(new THREE.SphereGeometry(.04,10,8),0xffd54f,130,fr+.03,nk+.2,0,topFront);
+    addT(new THREE.BoxGeometry(.012,.14,.012),0xffd54f,130,fr+.015,nk+.13,0,topFront);
+  }
+  // рукава
+  for(let k=0;k<4;k++){
+    const s=topSleeves[k],isUp=(k===0||k===2),far=(k>=2);
+    const rs=isUp?d.sl[0]:d.sl[1],re=isUp?d.sl[1]:d.sl[2];
+    const main=new THREE.Mesh(new THREE.CylinderGeometry(re,rs,1,14),pm(d.c,d.sh,far));
+    s.g.add(main);s.main=main;
+    const add=(geo,col,sh,y)=>{const m=new THREE.Mesh(geo,pm(col,sh,far));m.position.set(0,y,0);s.g.add(m);return m;};
+    if(d.cuff&&!isUp)add(new THREE.CylinderGeometry(re+.012,re+.012,.07,14),d.c2,d.sh,.115);
+    if(d.rings){add(new THREE.CylinderGeometry((rs+re)/2*1.05+.004,(rs+re)/2*1.05+.004,.026,14),d.c2,d.sh,-.04);add(new THREE.CylinderGeometry((rs+re)/2*1.05+.004,(rs+re)/2*1.05+.004,.026,14),d.c2,d.sh,.06);}
+  }
+  for(const m of topCaps){m.material=pm(d.c,d.sh,false);m.scale.set(d.sl[0]*1.02,d.sl[0]*1.02,d.sl[0]*1.02);m.visible=true;}
+}
+const topTmp=[0,0,0,0];
+function updateTop(want){
+  if(want!==topShown)buildTop(want);
+  topRoot.visible=!!topCur;
+  if(!topCur)return;
+  // корпус
+  limbXY(1,topTmp);
+  {
+    const dx=topTmp[2]-topTmp[0],dy=topTmp[3]-topTmp[1],len=Math.hypot(dx,dy)||.001;
+    topTorso.position.set((topTmp[0]+topTmp[2])/2,(topTmp[1]+topTmp[3])/2,0);
+    topTorso.rotation.z=Math.atan2(dy,dx)-Math.PI/2;
+    topFront.scale.x=face;
+    if(topMain)topMain.scale.set(.92,len+.06,1.12);
+    const nx=topTmp[0],ny=topTmp[1];
+    topCaps[0].position.set(nx,ny,.18);topCaps[1].position.set(nx,ny,-.18);
+  }
+  const LI=[6,7,8,9];
+  for(let k=0;k<4;k++){
+    const li=LI[k];
+    limbXY(li,topTmp);
+    const dx=topTmp[2]-topTmp[0],dy=topTmp[3]-topTmp[1],len=Math.hypot(dx,dy)||.001;
+    const g=topSleeves[k].g;
+    g.position.set((topTmp[0]+topTmp[2])/2,(topTmp[1]+topTmp[3])/2,limbs[li].userData.z);
+    g.rotation.z=Math.atan2(dy,dx)-Math.PI/2;
+    if(topSleeves[k].main)topSleeves[k].main.scale.set(1,len,1);
+  }
+}
+
+
 /* ---------- травмы: синяки, ссадины, раны, переломы, отрыв ---------- */
 const INJ=[];
 for(let i=0;i<10;i++)INJ.push({dmg:0,bruise:0,blood:0,scr:0,fx:false,cd:0,bleedT:0,scrM:[]});
 const BODY_LIMB=[1,0,2,4,3,5,6,8,7,9];
-let health=100,injToastCd=0;
+let health=100,injToastCd=0,headImpactFx=0,headImpactPower=0,screenFxType=1;
+let headFxEnabled=store.get('pk_headfx',1)!==0;
 const legBreakN=()=>(INJ[2].fx?1:0)+(INJ[3].fx?1:0)+(INJ[4].fx?1:0)+(INJ[5].fx?1:0);
 const legFactor=()=>Math.max(.4,1-.2*legBreakN());
 const scrGeo=new THREE.BoxGeometry(.12,.012,.012);
@@ -2003,7 +2121,7 @@ function resetInjuries(){
     I.dmg=0;I.bruise=0;I.blood=0;I.scr=0;I.fx=false;I.cd=0;I.bleedT=0;I.scrM.length=0;
   }
   for(const o of injMeshes){o.m.visible=false;o.m.material.opacity=0;o.op=0;}
-  health=100;injToastCd=0;
+  health=100;injToastCd=0;headImpactFx=0;headImpactPower=0;$('headImpactFx').style.opacity=0;
 }
 function injToast(t,force){if(injToastCd<=0||force){toast(t);injToastCd=1.6;}}
 function addScratch(bi){
@@ -2029,6 +2147,11 @@ function applyImpact(bi,imp,kind){
   const hard=gore===2;
   const d=Math.pow(eff-3.5,1.8)*.5*(hard?1.25:1)*(bi===1?1.3:1);
   I.dmg+=d;
+  if(headFxEnabled){
+    headImpactFx=Math.max(headImpactFx,Math.min(2.8,.55+eff*.075));
+    headImpactPower=Math.max(headImpactPower,clamp(eff/22,.18,1));
+    screenFxType=(bi===1?1:(bi===0?2:(bi>=2&&bi<=5?3:4)));
+  }
   I.bruise=Math.min(1,I.bruise+clamp((eff-3.5)/22,.04,.5));
   if(eff>=5&&I.scr<6&&Math.random()<.8){I.scr++;addScratch(bi);}
   if(eff>=8){
@@ -2062,6 +2185,20 @@ function limbXY(li,o){
 }
 function updateInjuries(dt){
   injToastCd=Math.max(0,injToastCd-dt);
+  headImpactFx=Math.max(0,headImpactFx-dt*(.42+headImpactPower*.12));
+  headImpactPower=Math.max(0,headImpactPower-dt*.22);
+  const headFxEl=$('headImpactFx');
+  if(headFxEl){
+    const a=headFxEnabled?(Math.min(1,headImpactFx/2.1)*(.28+headImpactPower*.28)):0;
+    const fxBg=screenFxType===1
+      ? 'radial-gradient(ellipse at center,transparent 30%,rgba(20,12,35,.22) 65%,rgba(18,8,28,.88) 115%),linear-gradient(110deg,rgba(100,155,255,.22),rgba(255,255,255,.03),rgba(100,155,255,.22))'
+      : screenFxType===2
+      ? 'radial-gradient(ellipse at center,transparent 24%,rgba(100,12,18,.18) 62%,rgba(115,0,8,.78) 115%),linear-gradient(0deg,rgba(180,25,25,.12),transparent 55%)'
+      : screenFxType===3
+      ? 'linear-gradient(90deg,rgba(255,175,35,.0),rgba(255,190,55,.18) 18%,transparent 48%,rgba(255,190,55,.18) 82%,rgba(255,175,35,.0)),radial-gradient(ellipse at center,transparent 48%,rgba(80,45,10,.48) 115%)'
+      : 'linear-gradient(0deg,rgba(255,125,25,.35),transparent 58%),radial-gradient(ellipse at center,transparent 35%,rgba(95,45,10,.48) 115%)';
+    headFxEl.style.background=fxBg;headFxEl.style.opacity=a.toFixed(3);
+  }
   if(!dismembered)health=Math.min(100,health+dt*.4);
   for(let bi=0;bi<10;bi++){
     const I=INJ[bi];
@@ -2130,18 +2267,22 @@ let ownedCapes=store.get('pk_capes',['none']);if(!Array.isArray(ownedCapes)||own
 let curCape=store.get('pk_cape','none');if(!CAPES.some(h=>h.id===curCape))curCape='none';
 let ownedPants=store.get('pk_pantsown',['none']);if(!Array.isArray(ownedPants)||ownedPants.indexOf('none')<0)ownedPants=['none'];
 let curPants=store.get('pk_pants','none');if(!PANTS3.some(h=>h.id===curPants))curPants='none';
-let previewHat=null,previewCape=null,previewPants=null,inShop=false,shopTab='hats';
+let ownedTops=store.get('pk_topsown',['none']);if(!Array.isArray(ownedTops)||ownedTops.indexOf('none')<0)ownedTops=['none'];
+let curTop=store.get('pk_tops','none');if(!TOPS3.some(h=>h.id===curTop))curTop='none';
+let previewHat=null,previewCape=null,previewPants=null,previewTop=null,inShop=false,shopTab='hats';
 const CATS={
   h:{list:HATS,own:()=>ownedHats,cur:()=>curHat,set:v=>{curHat=v;previewHat=v;},prev:()=>previewHat,setPrev:v=>{previewHat=v;},ck:'pk_hat',ok:'pk_hats'},
   c:{list:CAPES,own:()=>ownedCapes,cur:()=>curCape,set:v=>{curCape=v;previewCape=v;},prev:()=>previewCape,setPrev:v=>{previewCape=v;},ck:'pk_cape',ok:'pk_capes'},
-  p:{list:PANTS3,own:()=>ownedPants,cur:()=>curPants,set:v=>{curPants=v;previewPants=v;},prev:()=>previewPants,setPrev:v=>{previewPants=v;},ck:'pk_pants',ok:'pk_pantsown'}
+  p:{list:PANTS3,own:()=>ownedPants,cur:()=>curPants,set:v=>{curPants=v;previewPants=v;},prev:()=>previewPants,setPrev:v=>{previewPants=v;},ck:'pk_pants',ok:'pk_pantsown'},
+  t:{list:TOPS3,own:()=>ownedTops,cur:()=>curTop,set:v=>{curTop=v;previewTop=v;},prev:()=>previewTop,setPrev:v=>{previewTop=v;},ck:'pk_tops',ok:'pk_topsown'}
 };
-const TABKEY={hats:'h',capes:'c',pants:'p'};
+const TABKEY={hats:'h',capes:'c',pants:'p',tops:'t'};
 function renderShop(){
   $('shopCoins').textContent='Монеты: '+coins;
   $('shTabHats').className='mbtn'+(shopTab==='hats'?'':' sec');
   $('shTabCapes').className='mbtn'+(shopTab==='capes'?'':' sec');
   $('shTabPants').className='mbtn'+(shopTab==='pants'?'':' sec');
+  $('shTabTops').className='mbtn'+(shopTab==='tops'?'':' sec');
   const pf=TABKEY[shopTab],cat=CATS[pf],ownedL=cat.own(),curId=cat.cur(),prev=cat.prev();
   let h='';
   for(const t of cat.list){
@@ -2185,11 +2326,12 @@ $('shopList').addEventListener('click',e=>{
 });
 function openShop(){
   const si=spIdx;spIdx=0;spawn();spIdx=si;face=1;animate(.016);
-  previewHat=curHat;previewCape=curCape;previewPants=curPants;renderShop();showScreen('shop');
+  previewHat=curHat;previewCape=curCape;previewPants=curPants;previewTop=curTop;renderShop();showScreen('shop');
 }
 $('shTabHats').addEventListener('click',()=>{shopTab='hats';renderShop();});
 $('shTabCapes').addEventListener('click',()=>{shopTab='capes';renderShop();});
 $('shTabPants').addEventListener('click',()=>{shopTab='pants';renderShop();});
+$('shTabTops').addEventListener('click',()=>{shopTab='tops';renderShop();});
 $('shBack').addEventListener('click',goMain);
 $('shTurn').addEventListener('click',()=>{face=-face;startBlend(.01);animate(.016);});
 
@@ -2454,7 +2596,7 @@ let gIdx=0,best=0,touchUI=true;
 }
 function showScreen(id){
   for(const s of SCREENS)$(s).style.display=(s===id)?((id==='main'||id==='editor')?'block':'flex'):'none';
-  screenId=id;inMenu=(id==='main');inShop=(id==='shop');if(!inShop){previewHat=null;previewCape=null;previewPants=null;}
+  screenId=id;inMenu=(id==='main');inShop=(id==='shop');if(!inShop){previewHat=null;previewCape=null;previewPants=null;previewTop=null;}
   releaseInputs();
 }
 function hideScreens(){
@@ -2471,6 +2613,7 @@ function refreshSettings(){
   $('sSpawn').textContent='Спавн: '+spawnName();
   $('sMap').textContent='Карта: '+MAPNAMES[mapSel];
   $('sTouch').textContent='Экранные кнопки: '+(touchUI?'ВКЛ':'ВЫКЛ');
+  $('sHeadFx').textContent='Эффекты ранений: '+(headFxEnabled?'ВКЛ':'ВЫКЛ');
   const g=settingsFrom==='game';
   $('sRestart').style.display=g?'block':'none';
   $('sHome').style.display=g?'block':'none';
@@ -2543,6 +2686,7 @@ $('sMap').addEventListener('click',()=>{
 });
 $('mmMap').addEventListener('click',()=>{nextMap();updateMainInfo();});
 $('sTouch').addEventListener('click',()=>{touchUI=!touchUI;store.set('pk_touch',touchUI?1:0);applyTouchUI();refreshSettings();});
+$('sHeadFx').addEventListener('click',()=>{headFxEnabled=!headFxEnabled;store.set('pk_headfx',headFxEnabled?1:0);if(!headFxEnabled){headImpactFx=0;headImpactPower=0;const el=$('headImpactFx');if(el)el.style.opacity=0;}refreshSettings();});
 $('sCtl').addEventListener('click',()=>{renderControls();showScreen('controls');});
 $('sHelp').addEventListener('click',()=>showScreen('help'));
 $('sReplay').addEventListener('click',()=>{refreshReplayInfo();showScreen('replay');paused=true;});
@@ -2564,6 +2708,7 @@ function mpGetLocalParts(){
   const sources=[...limbs,...joints,hair,eye];
   hatOuter.traverse(o=>{if(o.isMesh)sources.push(o);});
   pantsRoot.traverse(o=>{if(o.isMesh)sources.push(o);});
+  topRoot.traverse(o=>{if(o.isMesh)sources.push(o);});
   if(cloth&&cloth.mesh)sources.push(cloth.mesh);
   for(const o of injMeshes)sources.push(o.m);
   for(const I of INJ)for(const sc of I.scrM)sources.push(sc.m);
@@ -2712,7 +2857,8 @@ function mpUpdate(dt,now){
     const bodies=mode===PHYS?BD.map(b=>({x:b.x,y:b.y,a:b.a,vx:b.vx,vy:b.vy,w:b.w,m:b.m,I:b.I,circ:b.circ.map(c=>[c[0],c[1],c[2]])})):null;
     try{mpConn.send(JSON.stringify({type:'state',x,y,face,phys:mode===PHYS,angle:mode===PHYS?BD[0].a:0,vx:mode===PHYS?BD[0].vx:C.vx,vy:mode===PHYS?BD[0].vy:C.vy,by:C.by,bodyH:BODY_H,bodyW:HW,bodies,parts,name:'Игрок'}));}catch(_){}
   }
-  for(const [id,r] of mpRemotePlayers){const d=r.data;if(!d)continue;const renderParts=mpGetInterpolatedParts(r,now);if(r.parts.length&&Array.isArray(renderParts)){const n=Math.min(renderParts.length,r.parts.length);for(let i=0;i<n;i++){const part=renderParts[i],obj=r.parts[i];if(part&&Array.isArray(part.m)&&part.m.length===16){obj.matrix.fromArray(part.m);obj.visible=!!part.v;const mats=Array.isArray(obj.material)?obj.material:[obj.material];for(const mat of mats){if(part.c!==null&&mat.color)mat.color.setHex(part.c);if(Number.isFinite(part.o))mat.opacity=part.o;}if(Array.isArray(part.clothPos)&&obj.geometry.attributes.position&&part.clothPos.length===obj.geometry.attributes.position.array.length){obj.geometry.attributes.position.array.set(part.clothPos);obj.geometry.attributes.position.needsUpdate=true;obj.geometry.computeVertexNormals();}if(Array.isArray(part.clothCol)&&obj.geometry.attributes.color&&part.clothCol.length===obj.geometry.attributes.color.array.length){obj.geometry.attributes.color.array.set(part.clothCol);obj.geometry.attributes.color.needsUpdate=true;}}}}
+  for(const [id,r] of mpRemotePlayers){const d=r.data;if(!d)continue;
+    const renderParts=mpGetInterpolatedParts(r,now);if(r.parts.length&&Array.isArray(renderParts)){const n=Math.min(renderParts.length,r.parts.length);for(let i=0;i<n;i++){const part=renderParts[i],obj=r.parts[i];if(part&&Array.isArray(part.m)&&part.m.length===16){obj.matrix.fromArray(part.m);obj.visible=!!part.v;const mats=Array.isArray(obj.material)?obj.material:[obj.material];for(const mat of mats){if(part.c!==null&&mat.color)mat.color.setHex(part.c);if(Number.isFinite(part.o))mat.opacity=part.o;}if(Array.isArray(part.clothPos)&&obj.geometry.attributes.position&&part.clothPos.length===obj.geometry.attributes.position.array.length){obj.geometry.attributes.position.array.set(part.clothPos);obj.geometry.attributes.position.needsUpdate=true;obj.geometry.computeVertexNormals();}if(Array.isArray(part.clothCol)&&obj.geometry.attributes.color&&part.clothCol.length===obj.geometry.attributes.color.array.length){obj.geometry.attributes.color.array.set(part.clothCol);obj.geometry.attributes.color.needsUpdate=true;}}}}
     mpResolvePlayerCollision(d,dt);
   }
 }
@@ -2955,6 +3101,7 @@ function frame(now){
     hatOuter.position.set(X[HEAD],Y[HEAD],0);hatOuter.rotation.z=Math.atan2(-ux,uy);hatInner.rotation.y=face<0?Math.PI:0;
     updateCape((inShop&&previewCape!==null)?previewCape:curCape,dt);
     updatePants((inShop&&previewPants!==null)?previewPants:curPants);
+    updateTop((inShop&&previewTop!==null)?previewTop:curTop);
     updateInjuryVisuals();
     const hv=Math.round(health);
     if(hv!==hpShown){hpShown=hv;$('hpFill').style.width=hv+'%';$('hpTxt').textContent='❤ '+hv;}
