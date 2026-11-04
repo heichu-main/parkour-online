@@ -32,7 +32,6 @@
   canvas{display:block;width:100%;height:100%;}
   #ui{position:absolute;top:0;bottom:0;left:env(safe-area-inset-left,0px);right:env(safe-area-inset-right,0px);pointer-events:none;}
 
-  #alwaysClientId{position:absolute;z-index:40;top:8px;left:50%;transform:translateX(-50%);max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 10px;border-radius:8px;background:rgba(18,32,58,.78);color:#fff;font-size:12px;font-weight:800;letter-spacing:.03em;pointer-events:none;text-shadow:0 1px 2px #000;}
   .btn{
     position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;
     background:var(--btn);color:var(--txt);border-radius:6px;pointer-events:auto;
@@ -208,7 +207,6 @@
     <div id="portrait">Поверните телефон горизонтально</div>
   </div>
 
-  <div id="alwaysClientId" aria-live="polite">ID: загружается…</div>
 
   <!-- главное меню -->
   <div id="main" class="screen">
@@ -229,7 +227,7 @@
 
   <div id="codes" class="screen dim"><div class="panel" style="max-width:520px"><h2>КОДЫ</h2><p>Введи код, чтобы открыть секретный скин.</p><input id="codeInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Введите код" style="width:100%;box-sizing:border-box;padding:14px;border-radius:8px;border:0;font-size:18px;margin:8px 0;color:#222"><button class="mbtn" id="codeRedeem">Активировать</button><div id="codeMsg" style="min-height:1.5em;margin:10px 0"></div><button class="mbtn sec" id="codeBack">Назад</button></div></div>
 
-  <div id="profile" class="screen dim"><div class="panel" style="max-width:520px"><h2>ПРОФИЛЬ</h2><p>Твой ID клиента:</p><div id="profileId" style="padding:12px;background:rgba(255,255,255,.1);border-radius:8px;font-weight:800;overflow-wrap:anywhere">Подключись к сети, чтобы получить ID</div><p style="margin-top:18px">Ник над головой (виден игрокам в мультиплеере):</p><input id="profileNick" maxlength="20" autocomplete="off" placeholder="Введите ник" style="width:100%;box-sizing:border-box;padding:14px;border-radius:8px;border:0;font-size:18px;margin:8px 0;color:#222"><button class="mbtn" id="profileSave">Сохранить ник</button><div id="profileMsg" style="min-height:1.5em"></div><button class="mbtn sec" id="profileBack">Назад</button></div></div>
+  <div id="profile" class="screen dim"><div class="panel" style="max-width:520px"><h2>ПРОФИЛЬ</h2><p>Твой ID клиента:</p><div id="profileId" style="padding:12px;background:rgba(255,255,255,.1);border-radius:8px;font-weight:800;overflow-wrap:anywhere">Загрузка ID…</div><button class="mbtn" id="profileCopyId" style="margin-top:8px">Скопировать ID</button><div id="profileCopyMsg" style="min-height:1.4em;font-size:14px" aria-live="polite"></div><p style="margin-top:18px">Ник над головой (виден игрокам в мультиплеере):</p><input id="profileNick" maxlength="20" autocomplete="off" placeholder="Введите ник" style="width:100%;box-sizing:border-box;padding:14px;border-radius:8px;border:0;font-size:18px;margin:8px 0;color:#222"><button class="mbtn" id="profileSave">Сохранить ник</button><div id="profileMsg" style="min-height:1.5em"></div><button class="mbtn sec" id="profileBack">Назад</button></div></div>
   <div id="multiplayer" class="screen dim"><div id="mpPanel"><h2>ОБЩИЙ СЕРВЕР</h2><p>Игра автоматически подключается к одному серверу. Все игроки находятся в общей комнате — коды не нужны.</p><div id="mpRoom" style="font-weight:800;overflow-wrap:anywhere">Общая комната</div><div id="mpStatus">Подключаемся к серверу…</div><button class="mbtn" id="mpReconnect">Переподключиться</button><button class="mbtn sec" id="mpBack">Назад</button></div></div>
   <!-- настройки -->
   <div id="settings" class="screen dim">
@@ -2852,11 +2850,11 @@ $('sHome').addEventListener('click',goMain);
 let mpConn=null,mpLastSend=0,mpLocalParts=[],mpLocalId=null,mpLocalAppearanceSignature='';
 const MP_INTERPOLATION_DELAY=90; // запас времени для плавного отображения между сетевыми пакетами
 const mpRemotePlayers=new Map();
-mpRefreshProfileId();
 function mpStatus(t){const el=$('mpStatus');if(el)el.textContent=t;}
 function mpGetClientId(){let id=store.get('pk_client_id','');if(!id){id='P-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,10).toUpperCase();store.set('pk_client_id',id);}return id;}
 const mpClientId=mpGetClientId();
-function mpRefreshProfileId(){const label='ID: '+mpClientId;const el=$('profileId');if(el)el.textContent=mpClientId;const badge=$('alwaysClientId');if(badge)badge.textContent=label;}
+mpRefreshProfileId();
+function mpRefreshProfileId(){const el=$('profileId');if(el)el.textContent=mpClientId;}
 function mpSetRemoteName(r,name){
   if(!r||!r.group)return;const label=(String(name||'Игрок').trim().replace(/[<>]/g,'').slice(0,20)||'Игрок');
   if(!r.nameSprite){const cv=document.createElement('canvas');cv.width=512;cv.height=128;const tex=new THREE.CanvasTexture(cv);const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});const sp=new THREE.Sprite(mat);sp.scale.set(1.65,.42,1);sp.position.set(0,2.05,0);r.group.add(sp);r.nameSprite=sp;r.nameCanvas=cv;}
@@ -2950,6 +2948,7 @@ $('mpBack').addEventListener('click',()=>showScreen('main'));
 $('mmMulti').addEventListener('click',()=>{showScreen('multiplayer');paused=true;mpConnectServer();});
 $('mmProfile').addEventListener('click',()=>{const n=store.get('pk_mp_nick','');$('profileNick').value=n;$('profileMsg').textContent='';mpRefreshProfileId();showScreen('profile');paused=true;if(!mpLocalId)mpConnectServer();});
 $('profileSave').addEventListener('click',()=>{const nick=$('profileNick').value.trim().replace(/[<>\\]/g,'').slice(0,20);store.set('pk_mp_nick',nick);$('profileNick').value=nick;$('profileMsg').textContent=nick?'Ник сохранён! Он будет виден другим игрокам.':'Ник очищен. Будет отображаться «Игрок».';});
+$('profileCopyId').addEventListener('click',async()=>{const msg=$('profileCopyMsg');try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(mpClientId);}else{const t=document.createElement('textarea');t.value=mpClientId;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();const ok=document.execCommand('copy');t.remove();if(!ok)throw new Error('copy failed');}msg.textContent='ID скопирован!';}catch(_){msg.textContent='Не удалось скопировать. Выдели ID и скопируй вручную.';}});
 $('profileBack').addEventListener('click',goMain);
 function mpResolvePlayerCollision(remote,dt){
   const clamp01=(v)=>Math.max(0,Math.min(1,v));
