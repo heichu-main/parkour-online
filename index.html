@@ -233,6 +233,11 @@
   <div id="settings" class="screen dim">
     <div class="panel">
       <h2>НАСТРОЙКИ</h2>
+      <div class="grid2" style="margin-bottom:12px">
+        <button class="mbtn" id="settingsTabMain">ОСНОВНЫЕ</button>
+        <button class="mbtn sec" id="settingsTabCamera">КАМЕРА</button>
+      </div>
+      <div id="mainSettings">
       <div class="grid2">
         <button class="mbtn sec" id="sDis">Расчленение: ВКЛ</button>
         <button class="mbtn sec" id="sGrav">Гравитация: Земля</button>
@@ -240,11 +245,50 @@
         <button class="mbtn sec" id="sMap">Карта: Арена</button>
         <button class="mbtn sec" id="sTouch">Экранные кнопки: ВКЛ</button>
         <button class="mbtn sec" id="sHeadFx">Эффекты ранений: ВКЛ</button>
+        <button class="mbtn sec" id="sFullscreen">Полно-экранный режим: ВЫКЛ</button>
         <button class="mbtn sec" id="sCtl">Управление</button>
         <button class="mbtn sec" id="sReplay">Реплей</button>
         <button class="mbtn sec" id="sHelp">Как играть</button>
         <button class="mbtn sec" id="sRestart">Начать заново</button>
         <button class="mbtn sec" id="sHome">Главное меню</button>
+      </div>
+      </div>
+      <div id="cameraSettings" style="display:none;margin-top:8px;padding:12px;background:rgba(255,255,255,.08);border-radius:10px;text-align:left">
+        <b style="display:block;text-align:center;margin-bottom:8px">РЕЖИМ КАМЕРЫ</b>
+        <div class="grid2">
+          <button class="mbtn sec" id="camModeFree">Свободная</button>
+          <button class="mbtn sec" id="camModeStatic">Статичная</button>
+        </div>
+        <div style="font-size:12px;opacity:.8;text-align:center;margin:4px 0 12px">Свободная — плавно следует за игроком. Статичная — жёстко привязана к игроку.</div>
+        <div id="cameraMountControls" style="display:none;margin:8px 0 12px">
+          <b style="display:block;text-align:center;margin:8px 0">К ЧАСТИ ТЕЛА</b>
+          <div class="grid2">
+            <button class="mbtn sec" id="camMountHead">Голова</button>
+            <button class="mbtn sec" id="camMountNeck">Шея</button>
+            <button class="mbtn sec" id="camMountTorso">Торс</button>
+            <button class="mbtn sec" id="camMountPelvis">Таз</button>
+          </div>
+          <div style="font-size:12px;opacity:.75;text-align:center;margin-top:5px">Камера будет жёстко следовать за выбранной частью тела. Положение регулируется ползунками X/Y/Z.</div>
+        </div>
+        <b style="display:block;text-align:center;margin:10px 0 8px">ТИП КАМЕРЫ</b>
+        <div class="grid2">
+          <button class="mbtn sec" id="camProjection3d">3D</button>
+          <button class="mbtn sec" id="camProjection2d">2D</button>
+        </div>
+        <div id="camera3dControls">
+          <b style="display:block;text-align:center;margin:14px 0 8px">НАСТРОЙКИ 3D</b>
+          <label style="display:block;margin:8px 0">X: <span id="camXVal">0.0</span><input id="camOffsetX" type="range" min="-10" max="10" step="0.1" value="0" style="width:100%"></label>
+          <label style="display:block;margin:8px 0">Y: <span id="camYVal">0.0</span><input id="camOffsetY" type="range" min="-8" max="8" step="0.1" value="0" style="width:100%"></label>
+          <label style="display:block;margin:8px 0">Z: <span id="camZVal">0.0</span><input id="camOffsetZ" type="range" min="-15" max="15" step="0.1" value="0" style="width:100%"></label>
+          <label style="display:block;margin:8px 0">FOV: <span id="camFovVal">45</span><input id="camFov" type="range" min="20" max="100" step="1" value="45" style="width:100%"></label>
+        </div>
+        <div id="camera2dControls" style="display:none">
+          <b style="display:block;text-align:center;margin:14px 0 8px">НАСТРОЙКИ 2D</b>
+          <label style="display:block;margin:8px 0">X: <span id="cam2dXVal">0.0</span><input id="cam2dX" type="range" min="-10" max="10" step="0.1" value="0" style="width:100%"></label>
+          <label style="display:block;margin:8px 0">Y: <span id="cam2dYVal">0.0</span><input id="cam2dY" type="range" min="-8" max="8" step="0.1" value="0" style="width:100%"></label>
+          <label style="display:block;margin:8px 0">Масштаб: <span id="cam2dZoomVal">1.0</span><input id="cam2dZoom" type="range" min="0.5" max="3" step="0.05" value="1" style="width:100%"></label>
+        </div>
+        <button class="mbtn sec" id="camReset" style="width:100%;margin-top:10px">Сбросить камеру</button>
       </div>
       <button class="mbtn" id="sClose">Назад</button>
     </div>
@@ -848,6 +892,14 @@ renderer.setClearColor(0x000000,0);
 wrap.insertBefore(renderer.domElement,wrap.firstChild);
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(45,2,.1,400);
+const camera2D=new THREE.OrthographicCamera(-10,10,10,-10,.1,400);
+const cameraPrefs={x:0,y:0,z:0,fov:45,mode:'free',mount:'head',projection:'3d',x2d:0,y2d:0,zoom2d:1};
+try{const saved=store.get('pk_camera',{});if(saved&&typeof saved==='object'){cameraPrefs.x=clamp(Number(saved.x)||0,-10,10);cameraPrefs.y=clamp(Number(saved.y)||0,-8,8);cameraPrefs.z=clamp(Number(saved.z)||0,-15,15);cameraPrefs.fov=clamp(Number(saved.fov)||45,20,100);cameraPrefs.mode=saved.mode==='static'?'static':'free';cameraPrefs.mount=['behind','side','front','top','first'].includes(saved.mount)?saved.mount:'head';cameraPrefs.projection=saved.projection==='2d'?'2d':'3d';cameraPrefs.x2d=clamp(Number(saved.x2d)||0,-10,10);cameraPrefs.y2d=clamp(Number(saved.y2d)||0,-8,8);cameraPrefs.zoom2d=clamp(Number(saved.zoom2d)||1,.5,3);}}catch(e){}
+camera.fov=cameraPrefs.fov;camera.updateProjectionMatrix();
+function refreshCameraControls(){for(const [id,key,valId] of [['camOffsetX','x','camXVal'],['camOffsetY','y','camYVal'],['camOffsetZ','z','camZVal'],['camFov','fov','camFovVal'],['cam2dX','x2d','cam2dXVal'],['cam2dY','y2d','cam2dYVal'],['cam2dZoom','zoom2d','cam2dZoomVal']]){const el=$(id),v=$(valId);if(el)el.value=cameraPrefs[key];if(v)v.textContent=key==='fov'?String(Math.round(cameraPrefs[key])):cameraPrefs[key].toFixed(1);}const active2d=cameraPrefs.projection==='2d';$('camera3dControls').style.display=active2d?'none':'block';$('camera2dControls').style.display=active2d?'block':'none';$('cameraMountControls').style.display=cameraPrefs.mode==='static'&&!active2d?'block':'none';$('camModeFree').classList.toggle('sec',cameraPrefs.mode!=='free');$('camModeStatic').classList.toggle('sec',cameraPrefs.mode!=='static');$('camProjection3d').classList.toggle('sec',!active2d);$('camProjection2d').classList.toggle('sec',active2d);for(const [id,m] of [['camMountHead','head'],['camMountNeck','neck'],['camMountTorso','torso'],['camMountPelvis','pelvis']])$(id).classList.toggle('sec',cameraPrefs.mount!==m);}
+function saveCameraPref(key,value){const limits={x:[-10,10],y:[-8,8],z:[-15,15],fov:[20,100],x2d:[-10,10],y2d:[-8,8],zoom2d:[.5,3]};cameraPrefs[key]=clamp(Number(value),limits[key][0],limits[key][1]);if(key==='fov'){camera.fov=cameraPrefs.fov;camera.updateProjectionMatrix();}store.set('pk_camera',cameraPrefs);refreshCameraControls();}
+function setCameraPref(key,value){cameraPrefs[key]=value;store.set('pk_camera',cameraPrefs);refreshCameraControls();}
+
 scene.add(new THREE.AmbientLight(0xffffff,.7));
 const sun=new THREE.DirectionalLight(0xffffff,.75);sun.position.set(-6,12,10);scene.add(sun);
 
@@ -2756,6 +2808,7 @@ function refreshSettings(){
   $('sMap').textContent='Карта: '+MAPNAMES[mapSel];
   $('sTouch').textContent='Экранные кнопки: '+(touchUI?'ВКЛ':'ВЫКЛ');
   $('sHeadFx').textContent='Эффекты ранений: '+(headFxEnabled?'ВКЛ':'ВЫКЛ');
+  $('sFullscreen').textContent='Полно-экранный режим: '+(isGameFullscreen()?'ВКЛ':'ВЫКЛ');
   const g=settingsFrom==='game';
   $('sRestart').style.display=g?'block':'none';
   $('sHome').style.display=g?'block':'none';
@@ -2775,7 +2828,7 @@ function goMain(){
 }
 function openSettings(from){
   settingsFrom=from||'main';
-  showScreen('settings');refreshSettings();
+  showScreen('settings');$('mainSettings').style.display='block';$('cameraSettings').style.display='none';$('settingsTabMain').classList.remove('sec');$('settingsTabCamera').classList.add('sec');refreshSettings();refreshCameraControls();
   paused=(settingsFrom==='main');
 }
 function closeSettings(){
@@ -2801,6 +2854,17 @@ function requestGameFullscreen(){
     if(root.webkitRequestFullscreen) root.webkitRequestFullscreen();
   }catch(e){}
 }
+function isGameFullscreen(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
+function toggleGameFullscreen(){
+  try{
+    if(isGameFullscreen()){
+      if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+      else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }else requestGameFullscreen();
+  }catch(e){}
+}
+document.addEventListener('fullscreenchange',()=>{const b=$('sFullscreen');if(b)b.textContent='Полно-экранный режим: '+(isGameFullscreen()?'ВКЛ':'ВЫКЛ');});
+document.addEventListener('webkitfullscreenchange',()=>{const b=$('sFullscreen');if(b)b.textContent='Полно-экранный режим: '+(isGameFullscreen()?'ВКЛ':'ВЫКЛ');});
 
 function startGame(){
   requestGameFullscreen();
@@ -2846,7 +2910,31 @@ $('codeRedeem').addEventListener('click',()=>{
 $('codeInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('codeRedeem').click();});
 $('skBack').addEventListener('click',goMain);
 delegate($('skinList'),'data-skin',id=>selectSkin(id));
+$('settingsTabMain').addEventListener('click',()=>{ $('mainSettings').style.display='block';$('cameraSettings').style.display='none';$('settingsTabMain').classList.remove('sec');$('settingsTabCamera').classList.add('sec');});
+$('settingsTabCamera').addEventListener('click',()=>{ $('mainSettings').style.display='none';$('cameraSettings').style.display='block';$('settingsTabCamera').classList.remove('sec');$('settingsTabMain').classList.add('sec');refreshCameraControls();});
+$('camModeFree').addEventListener('click',()=>setCameraPref('mode','free'));
+$('camModeStatic').addEventListener('click',()=>setCameraPref('mode','static'));
+
+
+
+
+
+$('camMountHead').addEventListener('click',()=>setCameraPref('mount','head'));
+$('camMountNeck').addEventListener('click',()=>setCameraPref('mount','neck'));
+$('camMountTorso').addEventListener('click',()=>setCameraPref('mount','torso'));
+$('camMountPelvis').addEventListener('click',()=>setCameraPref('mount','pelvis'));
+$('camProjection3d').addEventListener('click',()=>setCameraPref('projection','3d'));
+$('camProjection2d').addEventListener('click',()=>setCameraPref('projection','2d'));
+$('cam2dX').addEventListener('input',e=>saveCameraPref('x2d',e.target.value));
+$('cam2dY').addEventListener('input',e=>saveCameraPref('y2d',e.target.value));
+$('cam2dZoom').addEventListener('input',e=>saveCameraPref('zoom2d',e.target.value));
 $('sClose').addEventListener('click',closeSettings);
+$('sFullscreen').addEventListener('click',()=>{toggleGameFullscreen();setTimeout(()=>{const b=$('sFullscreen');if(b)b.textContent='Полно-экранный режим: '+(isGameFullscreen()?'ВКЛ':'ВЫКЛ');},150);});
+$('camOffsetX').addEventListener('input',e=>saveCameraPref('x',e.target.value));
+$('camOffsetY').addEventListener('input',e=>saveCameraPref('y',e.target.value));
+$('camOffsetZ').addEventListener('input',e=>saveCameraPref('z',e.target.value));
+$('camFov').addEventListener('input',e=>saveCameraPref('fov',e.target.value));
+$('camReset').addEventListener('click',()=>{Object.assign(cameraPrefs,{x:0,y:0,z:0,fov:45,x2d:0,y2d:0,zoom2d:1,mode:'free',mount:'head',projection:'3d'});camera.fov=45;camera.updateProjectionMatrix();store.set('pk_camera',cameraPrefs);refreshCameraControls();});
 $('sDis').addEventListener('click',()=>{gore=(gore+1)%3;store.set('pk_dis',gore);refreshSettings();});
 $('sGrav').addEventListener('click',()=>{gIdx=(gIdx+1)%GRAVS.length;store.set('pk_g',gIdx);applyGrav();refreshSettings();});
 $('sSpawn').addEventListener('click',()=>{spIdx=(spIdx+1)%SPAWNS.length;store.set('pk_sp',spIdx);refreshSettings();if(settingsFrom==='game')spawn();});
@@ -3224,7 +3312,7 @@ function resize(){
   W=wrap.clientWidth;Hh=wrap.clientHeight;
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
   renderer.setSize(W,Hh,false);
-  camera.aspect=W/Hh;camera.updateProjectionMatrix();
+  camera.aspect=W/Hh;camera.updateProjectionMatrix();camera2D.left=-10*(W/Hh);camera2D.right=10*(W/Hh);camera2D.top=10;camera2D.bottom=-10;camera2D.updateProjectionMatrix();
 }
 addEventListener('resize',resize);resize();
 
@@ -3288,8 +3376,25 @@ function frame(now){
   const D=inShop?Math.max(5.2,9.5/aspect):Math.max(7.5,13.5/aspect);
   const tx=X[PEL]+(inShop?2.7:(inMenu?0:2.2*face)),ty=inShop?Y[PEL]+.45:Math.max(Y[PEL]+1.1,.3);
   const kk=1-Math.exp(-6*dt);
-  camX+=(tx-camX)*kk;camY+=(ty-camY)*kk;
-  camera.position.set(camX,camY,D);camera.lookAt(camX,camY,0);
+  if(cameraPrefs.mode==='static'){camX=tx;camY=ty;}else{camX+=(tx-camX)*kk;camY+=(ty-camY)*kk;}
+  let anchorX=camX,anchorY=camY,mountZ=D;
+  if(cameraPrefs.mode==='static'){
+    const part=cameraPrefs.mount;
+    if(part==='head'){anchorX=X[HEAD];anchorY=Y[HEAD];}
+    else if(part==='neck'){anchorX=X[NECK];anchorY=Y[NECK];}
+    else if(part==='torso'){anchorX=(X[NECK]+X[PEL])*.5;anchorY=(Y[NECK]+Y[PEL])*.5;}
+    else if(part==='pelvis'){anchorX=X[PEL];anchorY=Y[PEL];}
+    else if(part==='leftShoulder'){anchorX=X[EA];anchorY=Y[EA];}
+    else if(part==='rightShoulder'){anchorX=X[EB];anchorY=Y[EB];}
+    else if(part==='leftHand'){anchorX=X[HA];anchorY=Y[HA];}
+    else if(part==='rightHand'){anchorX=X[HB];anchorY=Y[HB];}
+    else if(part==='leftFoot'){anchorX=X[FA];anchorY=Y[FA];}
+    else if(part==='rightFoot'){anchorX=X[FB];anchorY=Y[FB];}
+  }
+  const targetX=anchorX,targetY=anchorY;
+  camera.position.set(anchorX+cameraPrefs.x,anchorY+cameraPrefs.y,mountZ+cameraPrefs.z);camera.lookAt(targetX,targetY,0);
+  const c2x=camX+cameraPrefs.x2d,c2y=camY+cameraPrefs.y2d;
+  camera2D.position.set(c2x,c2y,60);camera2D.lookAt(c2x,c2y,0);camera2D.zoom=cameraPrefs.zoom2d;camera2D.updateProjectionMatrix();
   floor.position.x=camX;
   for(const c of clouds){if(c.position.x<camX-70)c.position.x+=160;}
 
@@ -3321,7 +3426,7 @@ function frame(now){
     if(want!==hatShown)buildHat(want);
     if(want!=='none')applyCustomColor('h',want);
     hatOuter.visible=(want!=='none');
-    const hatOffset=getHatOffset(want);const headAngle=Math.atan2(-ux,uy);const ox=hatOffset.x*Math.cos(headAngle)-hatOffset.y*Math.sin(headAngle);const oy=hatOffset.x*Math.sin(headAngle)+hatOffset.y*Math.cos(headAngle);hatOuter.position.set(X[HEAD]+ox,Y[HEAD]+oy,0);hatOuter.rotation.set(0,0,headAngle);hatInner.rotation.y=face<0?Math.PI:0;
+    const hatOffset=getHatOffset(want);const headAngle=Math.atan2(-ux,uy);/* Hat offsets are in head-local space: mirror local X with the head's facing direction, then rotate the offset with the head tilt. */const localHatX=hatOffset.x*face;const ox=localHatX*Math.cos(headAngle)-hatOffset.y*Math.sin(headAngle);const oy=localHatX*Math.sin(headAngle)+hatOffset.y*Math.cos(headAngle);hatOuter.position.set(X[HEAD]+ox,Y[HEAD]+oy,0);hatOuter.rotation.set(0,0,headAngle);hatInner.rotation.y=face<0?Math.PI:0;
     updateCape((inShop&&previewCape!==null)?previewCape:curCape,dt);
     const shownPants=(inShop&&previewPants!==null)?previewPants:curPants;
     updatePants(shownPants); if(shownPants!=='none')applyCustomColor('p',shownPants);
@@ -3332,7 +3437,7 @@ function frame(now){
     if(hv!==hpShown){hpShown=hv;$('hpFill').style.width=hv+'%';$('hpTxt').textContent='❤ '+hv;}
   }
   mpUpdate(dt,now);
-  renderer.render(scene,camera);
+  renderer.render(scene,cameraPrefs.projection==='2d'?camera2D:camera);
 }
 requestAnimationFrame(frame);
 
