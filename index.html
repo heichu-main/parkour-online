@@ -2573,7 +2573,7 @@ function releaseInputs(){
 function tryJump(v,fwd,salto){
   if(paused)return;
   if(mode===PHYS){
-    if(pins.length){release(6.5,.12);return;}
+    if(pins.length){release(0,.12);return;}
     if(coyoteLedge&&physT<.12&&!limp){
       for(const b of BD)b.vy=Math.max(b.vy,v);
       coyoteLedge=false;
@@ -2590,7 +2590,7 @@ function tryJump(v,fwd,salto){
 function saltoPress(){
   if(paused)return;
   if(mode===PHYS){
-    if(pins.length){release();return;}
+    if(pins.length){return;}
     if(!limp&&!spun&&physT<.5){spinAll(-3.4*face);spun=true;}
     return;
   }
@@ -3026,6 +3026,7 @@ function mpHandlePacket(packet){
   }else if(packet.type==='peer-left'){mpRemoveRemote(packet.id);mpStatus('Игрок отключился. На сервере ещё '+mpRemotePlayers.size+' других игроков.');}
   else if(packet.type==='admin-player-list'&&mpIsAdmin()){mpRenderAdminPlayers(packet.players||[]);}
   else if(packet.type==='admin-result'){const el=$('adminMsg');if(el)el.textContent=packet.message||'Готово';}
+  else if(packet.type==='admin-tag-update'&&packet.id){if(packet.id===mpLocalId){store.set('pk_mp_tag',packet.tagText||'');store.set('pk_mp_tag_color',packet.tagColor||'#ffd54a');mpUpdateLocalNameTag();}else{let r=mpRemotePlayers.get(packet.id);if(r&&r.data){r.data.tagText=packet.tagText||'';r.data.tagColor=packet.tagColor||'#ffd54a';mpSetRemoteName(r,r.data.name,r.data.tagText,r.data.tagColor);}}}
   else if(packet.type==='coin-update'){mpApplyServerCoins(packet.coins);}
   else if(packet.type==='kicked'){mpStatus('Тебя отключил администратор. Можно подключиться снова.');mpClean();}
   else if(packet.type==='peer-data'&&packet.id&&packet.id!==mpLocalId){

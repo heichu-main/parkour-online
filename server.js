@@ -22,7 +22,7 @@ function send(ws, obj) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stri
 function broadcast(obj, except = null) { const packet = JSON.stringify(obj); for (const ws of wss.clients) if (ws !== except && ws.readyState === WebSocket.OPEN) ws.send(packet); }
 function cleanText(value, max, fallback = '') { return String(value ?? '').replace(/[<>\\]/g, '').trim().slice(0, max) || fallback; }
 function isAdmin(record) { return !!record && record.clientId === ADMIN_ID; }
-function onlineList() { return [...players.values()].filter(p => p.ready).map(p => ({ id: p.clientId, nick: p.nick || 'Игрок' })); }
+function onlineList() { return [...players.values()].filter(p => p.ready).map(p => ({ id: p.clientId, nick: p.nick || 'Игрок', tagText: p.tagText || '', tagColor: p.tagColor || '#ffd54a' })); }
 function refreshAdminLists() { for (const [ws, p] of players) if (p.ready && isAdmin(p)) send(ws, { type: 'admin-player-list', players: onlineList() }); }
 function broadcastProfile(record) {
   if (record.state) {
@@ -67,13 +67,35 @@ wss.on('connection', (ws) => {
     }
     if (data.type === 'appearance') { record.appearance = Array.isArray(data.parts) ? data.parts : null; broadcast({ type: 'peer-data', id: record.clientId, data: { type: 'appearance', parts: record.appearance } }, ws); return; }
     if (data.type === 'profile') {
-      record.nick = cleanText(data.nick, 20, 'Игрок'); record.tagText = cleanText(data.tagText, 28, '');
-      record.tagColor = /^#[0-9a-fA-F]{6}$/.test(String(data.tagColor || '')) ? data.tagColor : '#ffd54a';
+      record.nick = cleanText(data.nick, 20, 'Игрок');
+      // Неймтаг может менять только администратор. Обычный игрок может менять только свой ник.
+      if (isAdmin(record)) {
+        record.tagText = cleanText(data.tagText, 28, '');
+        record.tagColor = /^#[0-9a-fA-F]{6}$/.test(String(data.tagColor || '')) ? data.tagColor : '#ffd54a';
+      }
       broadcastProfile(record); send(ws, { type: 'admin-result', message: 'Профиль обновлён.' }); return;
+    }
+    if (data.type === 'admin-tag') {
+      if (!isAdmin(record)) return send(ws, { type: 'admin-result', message: 'Нет прав администратора.' });
+      const targetId = String(data.targetId || '');
+      const targetEntry = [...players.entries()].find(([, p]) => p.ready && p.clientId === targetId);
+      if (!targetEntry) return send(ws, { type: 'admin-result', message: 'Игрок уже не на сервере.' });
+      const target = targetEntry[1];
+      target.tagText = cleanText(data.tagText, 28, '');
+      target.tagColor = /^#[0-9a-fA-F]{6}$/.test(String(data.tagColor || '')) ? data.tagColor : '#ffd54a';
+      send(targetEntry[0], { type: 'admin-tag-update', id: target.clientId, tagText: target.tagText, tagColor: target.tagColor });
+      broadcastProfile(target);
+      send(ws, { type: 'admin-result', message: `Неймтаг игрока ${target.nick || targetId} обновлён.` }); return;
     }
     if (data.type === 'admin-list') {
       if (!isAdmin(record)) return send(ws, { type: 'admin-result', message: 'Нет прав администратора.' });
       send(ws, { type: 'admin-player-list', players: onlineList() }); return;
+    }
+    if (data.type === 'earn-coins') {
+      const amount = Number(data.amount);
+      if (!Number.isSafeInteger(amount) || amount <= 0 || amount > 1000000) return;
+      const next = Math.max(0, Math.min(2147483647, (Number(balances[record.clientId]) || 0) + amount));
+      balances[record.clientId] = next; saveBalances(); send(ws, { type: 'coin-update', coins: next }); return;
     }
     if (data.type === 'admin-coins') {
       if (!isAdmin(record)) return send(ws, { type: 'admin-result', message: 'Нет прав администратора.' });
