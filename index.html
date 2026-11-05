@@ -295,6 +295,12 @@
       <h2>МАГАЗИН</h2>
       <div class="grid4"><button class="mbtn" id="shTabHats">Шляпы</button><button class="mbtn sec" id="shTabCapes">Плащи</button><button class="mbtn sec" id="shTabPants">Штаны</button><button class="mbtn sec" id="shTabTops">Кофты</button></div>
       <div id="shopCoins">Монеты: 0</div>
+      <div id="hatPositionControls" style="display:none;text-align:left;background:rgba(255,255,255,.08);border-radius:10px;padding:8px;margin:6px 0;font-size:13px">
+        <b>Положение шляпы</b> <span style="opacity:.75">(небольшая настройка)</span>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:6px">Влево / вправо <input id="hatOffsetX" type="range" min="-0.18" max="0.18" step="0.01" value="0" style="flex:1"><span id="hatOffsetXVal">0.00</span></label>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:6px">Вверх / вниз <input id="hatOffsetY" type="range" min="-0.18" max="0.18" step="0.01" value="0" style="flex:1"><span id="hatOffsetYVal">0.00</span></label>
+        <button class="mbtn sec" id="hatOffsetReset" style="margin-top:6px">Сбросить положение</button>
+      </div>
       <div id="shopList"></div>
       <div class="grid2">
         <button class="mbtn sec" id="shTurn">Повернуть</button>
@@ -977,6 +983,11 @@ const store={
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(_){}}
 };
 
+let totalSaltos=Math.max(0,Math.floor(Number(store.get('pk_total_saltos',0))||0));
+let saltoMilestones=store.get('pk_salto_milestones',[])||[];if(!Array.isArray(saltoMilestones))saltoMilestones=[];
+function registerLifetimeSaltos(n){if(!(n>0))return;totalSaltos+=n;store.set('pk_total_saltos',totalSaltos);const rewards=[[100,100],[500,1000],[1000,1000]];let earned=0;for(const [goal,prize] of rewards){if(totalSaltos>=goal&&!saltoMilestones.includes(goal)){saltoMilestones.push(goal);earned+=prize;}}store.set('pk_salto_milestones',saltoMilestones);if(earned>0){coins+=earned;store.set('pk_coins',coins);mpSend({type:'earn-coins',amount:earned});updateMainInfo();const sc=$('shopCoins');if(sc)sc.textContent='Монеты: '+coins;toast('Награда за сальто: +'+earned+' монет!');}}
+
+
 /* ---------- мир: арена и свои карты ---------- */
 let arenaObjs=[];
 function addObj(o){scene.add(o);arenaObjs.push(o);return o;}
@@ -1297,7 +1308,7 @@ function onWaterEntry(){
   const n=Math.floor(Math.abs(spinAcc)/(2*Math.PI)+.25);spinAcc=0;
   let gain=0,txt='';
   if(hgt>=5){const d=Math.floor(hgt/5);gain+=d;txt+='ПРЫЖОК С '+Math.round(hgt)+' м';}
-  if(n>0){saltos+=n;gain+=3*n;txt+=(txt?'  ·  ':'')+'САЛЬТО'+(n>1?' ×'+n:'');}
+  if(n>0){saltos+=n;registerLifetimeSaltos(n);gain+=3*n;txt+=(txt?'  ·  ':'')+'САЛЬТО'+(n>1?' ×'+n:'');}
   if(gain>0){coins+=gain;store.set('pk_coins',coins);toast(txt+'  +'+gain+' монет');}
 }
 const BUOY=[2.0,1.5,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0];
@@ -1702,7 +1713,7 @@ function onSaltoLanded(sp){
   const n=Math.floor(Math.abs(sp)/(2*Math.PI)+.25);
   spinAcc=0;
   if(n>0){
-    saltos+=n;const gain=3*n;coins+=gain;store.set('pk_coins',coins);
+    saltos+=n;registerLifetimeSaltos(n);const gain=3*n;coins+=gain;store.set('pk_coins',coins);
     toast('САЛЬТО'+(n>1?' ×'+n:'')+'  +'+gain+' монет');
   }
 }
@@ -2327,6 +2338,15 @@ function applyCustomColor(cat,id){
   if(cat==='p'&&pantsShown===id){paint(pantsRoot);}
   if(cat==='t'&&topShown===id){paint(topRoot);}
 }
+const hatOffsets=store.get('pk_hat_offsets',{});
+function activeHatForOffset(){return (previewHat!==null&&previewHat!=='none')?previewHat:curHat;}
+function getHatOffset(id){const v=hatOffsets[id]||{};return {x:clamp(Number(v.x)||0,-.18,.18),y:clamp(Number(v.y)||0,-.18,.18)};}
+function saveHatOffset(axis,value){const id=activeHatForOffset();if(!id||id==='none')return;const o=getHatOffset(id);o[axis]=clamp(Number(value)||0,-.18,.18);hatOffsets[id]=o;store.set('pk_hat_offsets',hatOffsets);renderHatOffsetControls();}
+function renderHatOffsetControls(){const panel=$('hatPositionControls');if(!panel)return;const id=activeHatForOffset();panel.style.display=shopTab==='hats'&&id&&id!=='none'?'block':'none';if(!id||id==='none')return;const o=getHatOffset(id);for(const [axis,label] of [['x','X'],['y','Y']]){const el=$('hatOffset'+label),val=$('hatOffset'+label+'Val');if(el)el.value=o[axis];if(val)val.textContent=o[axis].toFixed(2);}}
+$('hatOffsetX')?.addEventListener('input',e=>saveHatOffset('x',e.target.value));
+$('hatOffsetY')?.addEventListener('input',e=>saveHatOffset('y',e.target.value));
+$('hatOffsetReset')?.addEventListener('click',()=>{const id=activeHatForOffset();if(!id||id==='none')return;hatOffsets[id]={x:0,y:0};store.set('pk_hat_offsets',hatOffsets);renderHatOffsetControls();});
+
 const CATS={
   h:{list:HATS,own:()=>ownedHats,cur:()=>curHat,set:v=>{curHat=v;previewHat=v;},prev:()=>previewHat,setPrev:v=>{previewHat=v;},ck:'pk_hat',ok:'pk_hats'},
   c:{list:CAPES,own:()=>ownedCapes,cur:()=>curCape,set:v=>{curCape=v;previewCape=v;},prev:()=>previewCape,setPrev:v=>{previewCape=v;},ck:'pk_cape',ok:'pk_capes'},
@@ -2336,6 +2356,7 @@ const CATS={
 const TABKEY={hats:'h',capes:'c',pants:'p',tops:'t'};
 function renderShop(){
   $('shopCoins').textContent='Монеты: '+coins;
+  renderHatOffsetControls();
   $('shTabHats').className='mbtn'+(shopTab==='hats'?'':' sec');
   $('shTabCapes').className='mbtn'+(shopTab==='capes'?'':' sec');
   $('shTabPants').className='mbtn'+(shopTab==='pants'?'':' sec');
@@ -3256,7 +3277,7 @@ function frame(now){
     maxH=Math.max(maxH,Y[PEL]-HOVER);
     const hh=Math.max(0,Math.floor(maxH));
     if(hh>best){coins+=hh-best;best=hh;store.set('pk_h',best);store.set('pk_coins',coins);}
-    scoreEl.textContent='Высота: '+hh+' м  ·  сальто: '+saltos;
+    scoreEl.textContent='Высота: '+hh+' м  ·  твои сальто: '+totalSaltos;
     if(!replayPlaying&&!replayArmed){replayFrames.push(captureReplayFrame());if(replayFrames.length>60*180)replayFrames.shift();}
   }
   const sp=platUnder(X[PEL],Y[PEL]+.3);
@@ -3300,7 +3321,7 @@ function frame(now){
     if(want!==hatShown)buildHat(want);
     if(want!=='none')applyCustomColor('h',want);
     hatOuter.visible=(want!=='none');
-    hatOuter.position.set(X[HEAD],Y[HEAD],0);hatOuter.rotation.z=Math.atan2(-ux,uy);hatInner.rotation.y=face<0?Math.PI:0;
+    const hatOffset=getHatOffset(want);const headAngle=Math.atan2(-ux,uy);const ox=hatOffset.x*Math.cos(headAngle)-hatOffset.y*Math.sin(headAngle);const oy=hatOffset.x*Math.sin(headAngle)+hatOffset.y*Math.cos(headAngle);hatOuter.position.set(X[HEAD]+ox,Y[HEAD]+oy,0);hatOuter.rotation.set(0,0,headAngle);hatInner.rotation.y=face<0?Math.PI:0;
     updateCape((inShop&&previewCape!==null)?previewCape:curCape,dt);
     const shownPants=(inShop&&previewPants!==null)?previewPants:curPants;
     updatePants(shownPants); if(shownPants!=='none')applyCustomColor('p',shownPants);
