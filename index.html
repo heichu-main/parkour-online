@@ -731,7 +731,9 @@ function handWorld(i,out){
 }
 const hp={x:0,y:0};
 function release(boost,cd){
-  pins.length=0;grabCd=(cd===undefined)?.5:cd;
+  // Новый свободный полёт начинается с нуля: сальто, сделанные до
+  // отцепления, не переносятся в следующий захват турника.
+  pins.length=0;spinAcc=0;grabCd=(cd===undefined)?.5:cd;
   if(boost)for(const b of BD)b.vy+=boost;
 }
 function sever(ji,mult){
@@ -845,6 +847,9 @@ function physStep(dt){
         if(Math.hypot(hp.x-br.x,hp.y-br.y)<.3){
           let have=false;for(const p of pins)if(p.B===BD[hi])have=true;
           if(!have){
+            // Первый новый захват после свободного полёта засчитывает
+            // завершённые сальто, накопленные до касания турника.
+            if(pins.length===0)onSaltoLanded(spinAcc);
             const S={x:br.x,y:br.y,a:0,vx:0,vy:0,w:0,im:0,ii:0,c:1,s:0};
             pins.push({A:S,B:BD[hi],S:S,la:[0,0],lb:[0,-.15],bar:br,bx:br.x,by:br.y,
               rAx:0,rAy:0,rBx:0,rBy:0,Cx:0,Cy:0,k11:0,k12:0,k22:0,det:1});
@@ -1865,7 +1870,8 @@ const CAPES=[
   {id:'blue',name:'Синий плащ',price:40,c1:0x1e88e5,c2:0x0d2a66},
   {id:'black',name:'Чёрный плащ',price:70,c1:0x2b2b2b,c2:0x050505,trim:0xb71c1c},
   {id:'hero',name:'Плащ героя',price:90,c1:0xe53935,c2:0xb71c1c,trim:0xffd600},
-  {id:'royal',name:'Королевская мантия',price:160,c1:0x7b1fa2,c2:0x38006b,trim:0xffd54f}
+  {id:'royal',name:'Королевская мантия',price:160,c1:0x7b1fa2,c2:0x38006b,trim:0xffd54f},
+  {id:'rgb',name:'RGB',price:999,c1:0xff004c,c2:0x00e5ff}
 ];
 const CR=10,CC=5,CSP=.11,CZ=.115;
 const cloth={p:[],mesh:null,geo:null,pos:null,col:null,shown:'',acc:0,lx:0,ly:0,lf:1,t:0};
@@ -1882,6 +1888,36 @@ const cloth={p:[],mesh:null,geo:null,pos:null,col:null,shown:'',acc:0,lx:0,ly:0,
   mesh.frustumCulled=false;mesh.visible=false;scene.add(mesh);
   cloth.geo=geo;cloth.mesh=mesh;
   for(let i=0;i<n;i++)cloth.p.push({x:0,y:0,z:0,px:0,py:0,pz:0});
+}
+let rgbCapeColor=store.get('pk_rgb_cape_color','#ff004c');
+if(!/^#[0-9a-fA-F]{6}$/.test(rgbCapeColor))rgbCapeColor='#ff004c';
+let rgbCapeRainbow=!!store.get('pk_rgb_cape_rainbow',false);
+function hexRgb(hex){
+  const n=parseInt(hex.slice(1),16);
+  return {r:((n>>16)&255)/255,g:((n>>8)&255)/255,b:(n&255)/255};
+}
+function hslRgb(h,s,l){
+  h=((h%360)+360)%360;s/=100;l/=100;
+  const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;
+  let r=0,g=0,b=0;
+  if(h<60){r=c;g=x;}else if(h<120){r=x;g=c;}else if(h<180){g=c;b=x;}
+  else if(h<240){g=x;b=c;}else if(h<300){r=x;b=c;}else{r=c;b=x;}
+  return {r:r+m,g:g+m,b:b+m};
+}
+function setRGBCapeColors(time){
+  const base=hexRgb(rgbCapeColor);
+  for(let r=0;r<CR;r++)for(let c=0;c<CC;c++){
+    const i=(r*CC+c)*3;
+    let col;
+    if(rgbCapeRainbow){
+      col=hslRgb(time*85+r*18+c*8,100,55);
+    }else{
+      const shade=.72+.28*(1-r/(CR-1));
+      col={r:base.r*shade,g:base.g*shade,b:base.b*shade};
+    }
+    cloth.col[i]=col.r;cloth.col[i+1]=col.g;cloth.col[i+2]=col.b;
+  }
+  cloth.geo.attributes.color.needsUpdate=true;
 }
 function setCapeColors(def){
   const a=new THREE.Color(def.c1),b=new THREE.Color(def.c2),tr=def.trim!==undefined?new THREE.Color(def.trim):null;
@@ -1993,6 +2029,7 @@ function updateCape(want,dt){
   const vis=want!=='none';
   cloth.mesh.visible=vis;
   if(!vis)return;
+  if(want==='rgb')setRGBCapeColors(performance.now()/1000);
   const ax=X[NECK]-face*.09,ay=Y[NECK]-.03;
   if(Math.hypot(ax-cloth.lx,ay-cloth.ly)>1.5||face!==cloth.lf)resetCloth();
   cloth.lx=ax;cloth.ly=ay;cloth.lf=face;
@@ -2422,7 +2459,12 @@ function renderShop(){
     else if(!own)btn='<button class="mbtn" data-hbtn="'+pf+':'+t.id+'"'+(coins<t.price?' disabled':'')+'>Купить · '+t.price+'</button>';
     else btn=eq?'<button class="mbtn sec" data-hbtn="'+pf+':none">Снять</button>':'<button class="mbtn" data-hbtn="'+pf+':'+t.id+'">Надеть</button>';
     let paint='';
-    if(own&&t.id!=='none'&&pf!=='c'){
+    if(own&&t.id==='rgb'&&pf==='c'){
+      paint='<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-left:6px;font-size:12px">'
+        +'<label style="display:inline-flex;align-items:center;gap:5px">Цвет <input type="color" id="rgbCapeColor" value="'+rgbCapeColor+'" style="width:34px;height:28px;padding:0;border:0;background:transparent"></label>'
+        +'<label style="display:inline-flex;align-items:center;gap:5px">🌈 <input type="checkbox" id="rgbCapeRainbow" '+(rgbCapeRainbow?'checked':'')+'> Радуга</label>'
+        +'</div>';
+    }else if(own&&t.id!=='none'&&pf!=='c'){
       const rk=recolorKey(pf,t.id),unlocked=!!recolorUnlocked[rk],hex=customColor(pf,t.id)||'#ffffff';
       paint=unlocked
         ?'<label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;margin-left:6px">Цвет <input type="color" data-recolor-color="'+rk+'" value="'+hex+'" title="Выбрать цвет" style="width:34px;height:28px;padding:0;border:0;background:transparent"></label>'
@@ -2471,6 +2513,14 @@ $('shopList').addEventListener('click',e=>{
 });
 function handleShopRecolor(e){
   const el=e.target;
+  if(el&&el.id==='rgbCapeColor'){
+    rgbCapeColor=el.value;store.set('pk_rgb_cape_color',rgbCapeColor);
+    setRGBCapeColors(performance.now()/1000);return;
+  }
+  if(el&&el.id==='rgbCapeRainbow'){
+    rgbCapeRainbow=!!el.checked;store.set('pk_rgb_cape_rainbow',rgbCapeRainbow);
+    setRGBCapeColors(performance.now()/1000);return;
+  }
   if(!el||!el.getAttribute)return;
   const rk=el.getAttribute('data-recolor-color');if(!rk)return;
   const parts=rk.split(':');if(parts.length!==2)return;
@@ -2968,7 +3018,7 @@ function mpUpdateLocalNameTag(){
   const active=!!(mpConn&&mpConn.readyState===WebSocket.OPEN);
   if(!active){if(mpLocalNameSprite)mpLocalNameSprite.visible=false;return;}
   if(!mpLocalNameSprite){mpLocalNameCanvas=document.createElement('canvas');mpLocalNameCanvas.width=512;mpLocalNameCanvas.height=190;const tex=new THREE.CanvasTexture(mpLocalNameCanvas);const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});mpLocalNameSprite=new THREE.Sprite(mat);mpLocalNameSprite.scale.set(1.9,.7,1);scene.add(mpLocalNameSprite);}
-  const nick=(store.get('pk_mp_nick','').trim().replace(/[<>]/g,'').slice(0,20)||'Игрок');const tag=store.get('pk_mp_tag','').trim().replace(/[<>]/g,'').slice(0,28);const color=/^#[0-9a-fA-F]{6}$/.test(store.get('pk_mp_tag_color','#ffd54a'))?store.get('pk_mp_tag_color','#ffd54a'):'#ffd54a';
+  const nick=(store.get('pk_mp_nick','').trim().replace(/[<>]/g,'').slice(0,20)||'Player');const tag=store.get('pk_mp_tag','').trim().replace(/[<>]/g,'').slice(0,28);const color=/^#[0-9a-fA-F]{6}$/.test(store.get('pk_mp_tag_color','#ffd54a'))?store.get('pk_mp_tag_color','#ffd54a'):'#ffd54a';
   const cv=mpLocalNameCanvas,ctx=cv.getContext('2d');ctx.clearRect(0,0,512,190);ctx.textAlign='center';ctx.textBaseline='middle';if(tag){ctx.font='bold 42px Arial';ctx.lineWidth=8;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(tag,256,48,490);ctx.fillStyle=color;ctx.fillText(tag,256,48,490);}ctx.font='bold 48px Arial';ctx.lineWidth=9;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(nick,256,135,490);ctx.fillStyle='#ffffff';ctx.fillText(nick,256,135,490);mpLocalNameSprite.material.map.needsUpdate=true;
   const x=mode===PHYS?BD[0].x:C.x,y=mode===PHYS?BD[0].y:C.by+HOVER;mpLocalNameSprite.position.set(x,y+1.52,0);mpLocalNameSprite.visible=true;
 }
@@ -3071,7 +3121,7 @@ function mpConnectServer(){
   try{mpConn=new WebSocket(url);}catch(e){mpStatus('Не удалось создать подключение.');return;}
   mpConn.addEventListener('open',()=>{
     mpStatus('Соединение установлено. Загружаем игроков…');
-    mpSend({type:'hello',clientId:mpClientId,nick:(store.get('pk_mp_nick','').trim()||'Игрок'),tagText:store.get('pk_mp_tag',''),tagColor:store.get('pk_mp_tag_color','#ffd54a'),initialCoins:coins});
+    mpSend({type:'hello',clientId:mpClientId,nick:(store.get('pk_mp_nick','').trim()||'Player'),tagText:store.get('pk_mp_tag',''),tagColor:store.get('pk_mp_tag_color','#ffd54a'),initialCoins:coins});
     // Send the current appearance immediately on connection, without requiring the player to reselect the skin.
     mpRefreshLocalParts();
     const sources=mpGetLocalParts();
@@ -3085,8 +3135,8 @@ function mpConnectServer(){
 $('mpReconnect').addEventListener('click',mpConnectServer);
 $('mpBack').addEventListener('click',()=>showScreen('main'));
 $('mmMulti').addEventListener('click',()=>{showScreen('multiplayer');paused=true;mpConnectServer();});
-$('mmProfile').addEventListener('click',()=>{const n=store.get('pk_mp_nick','');$('profileNick').value=n;if(mpIsAdmin()){$('profileTag').value=store.get('pk_mp_tag','');$('profileTagColor').value=store.get('pk_mp_tag_color','#ffd54a');}$('profileMsg').textContent='';mpRefreshProfileId();$('profileTagAdminOnly').style.display=mpIsAdmin()?'block':'none';$('adminPanel').style.display=mpIsAdmin()?'block':'none';showScreen('profile');paused=true;if(!mpLocalId)mpConnectServer();else mpRefreshAdminList();});
-$('profileSave').addEventListener('click',()=>{const nick=$('profileNick').value.trim().replace(/[<>\\]/g,'').slice(0,20);store.set('pk_mp_nick',nick);let tag=store.get('pk_mp_tag',''),color=store.get('pk_mp_tag_color','#ffd54a');if(mpIsAdmin()){tag=$('profileTag').value.trim().replace(/[<>\\]/g,'').slice(0,28);color=$('profileTagColor').value;store.set('pk_mp_tag',tag);store.set('pk_mp_tag_color',color);}$('profileNick').value=nick;if(mpIsAdmin())$('profileTag').value=tag;$('profileMsg').textContent='Профиль сохранён!';mpSend({type:'profile',nick:nick||'Игрок',tagText:tag,tagColor:color});mpUpdateLocalNameTag();});
+$('mmProfile').addEventListener('click',()=>{const n=store.get('pk_mp_nick','Player').trim()||'Player';$('profileNick').value=n;if(mpIsAdmin()){$('profileTag').value=store.get('pk_mp_tag','');$('profileTagColor').value=store.get('pk_mp_tag_color','#ffd54a');}$('profileMsg').textContent='';mpRefreshProfileId();$('profileTagAdminOnly').style.display=mpIsAdmin()?'block':'none';$('adminPanel').style.display=mpIsAdmin()?'block':'none';showScreen('profile');paused=true;if(!mpLocalId)mpConnectServer();else mpRefreshAdminList();});
+$('profileSave').addEventListener('click',()=>{const nick=$('profileNick').value.trim().replace(/[<>\\]/g,'').slice(0,20)||'Player';store.set('pk_mp_nick',nick);let tag=store.get('pk_mp_tag',''),color=store.get('pk_mp_tag_color','#ffd54a');if(mpIsAdmin()){tag=$('profileTag').value.trim().replace(/[<>\\]/g,'').slice(0,28);color=$('profileTagColor').value;store.set('pk_mp_tag',tag);store.set('pk_mp_tag_color',color);}$('profileNick').value=nick;if(mpIsAdmin())$('profileTag').value=tag;$('profileMsg').textContent='Профиль сохранён!';mpSend({type:'profile',nick:nick||'Player',tagText:tag,tagColor:color});mpUpdateLocalNameTag();});
 $('profileCopyId').addEventListener('click',async()=>{const msg=$('profileCopyMsg');try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(mpClientId);}else{const t=document.createElement('textarea');t.value=mpClientId;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();const ok=document.execCommand('copy');t.remove();if(!ok)throw new Error('copy failed');}msg.textContent='ID скопирован!';}catch(_){msg.textContent='Не удалось скопировать. Выдели ID и скопируй вручную.';}});
 $('profileBack').addEventListener('click',goMain);
 $('adminApplyCoins').addEventListener('click',()=>{if(!mpIsAdmin()||!mpAdminSelectedId){$('adminMsg').textContent='Сначала выбери игрока.';return;}const amount=Number($('adminCoinAmount').value);if(!Number.isFinite(amount)||!Number.isInteger(amount)||amount===0){$('adminMsg').textContent='Введи целое число, не равное нулю.';return;}mpSend({type:'admin-coins',targetId:mpAdminSelectedId,amount});});
@@ -3161,7 +3211,7 @@ function mpUpdate(dt,now){
     mpRefreshLocalParts();scene.updateMatrixWorld(true);const parts=[];
     for(const src of mpLocalParts){src.updateMatrixWorld(true);let vis=true;for(let a=src;a&&a!==scene;a=a.parent)if(!a.visible){vis=false;break;}const mat=Array.isArray(src.material)?src.material[0]:src.material;const part={m:src.matrixWorld.toArray(),v:vis,c:mat&&mat.color?mat.color.getHex():null,o:mat&&Number.isFinite(mat.opacity)?mat.opacity:1};if(cloth&&src===cloth.mesh&&cloth.pos){part.clothPos=Array.from(cloth.pos);part.clothCol=Array.from(cloth.col);}parts.push(part);}
     const bodies=mode===PHYS?BD.map(b=>({x:b.x,y:b.y,a:b.a,vx:b.vx,vy:b.vy,w:b.w,m:b.m,I:b.I,circ:b.circ.map(c=>[c[0],c[1],c[2]])})):null;
-    try{mpConn.send(JSON.stringify({type:'state',x,y,face,phys:mode===PHYS,angle:mode===PHYS?BD[0].a:0,vx:mode===PHYS?BD[0].vx:C.vx,vy:mode===PHYS?BD[0].vy:C.vy,by:C.by,bodyH:BODY_H,bodyW:HW,bodies,parts,name:(store.get('pk_mp_nick','').trim()||'Игрок'),tagText:store.get('pk_mp_tag',''),tagColor:store.get('pk_mp_tag_color','#ffd54a')}));}catch(_){}
+    try{mpConn.send(JSON.stringify({type:'state',x,y,face,phys:mode===PHYS,angle:mode===PHYS?BD[0].a:0,vx:mode===PHYS?BD[0].vx:C.vx,vy:mode===PHYS?BD[0].vy:C.vy,by:C.by,bodyH:BODY_H,bodyW:HW,bodies,parts,name:(store.get('pk_mp_nick','').trim()||'Player'),tagText:store.get('pk_mp_tag',''),tagColor:store.get('pk_mp_tag_color','#ffd54a')}));}catch(_){}
   }
   for(const [id,r] of mpRemotePlayers){const d=r.data;if(!d)continue;
     if(r.nameSprite){r.nameSprite.position.set((Number.isFinite(d.x)?d.x:0),(Number.isFinite(d.y)?d.y:0)+1.18,0);r.nameSprite.visible=true;}
