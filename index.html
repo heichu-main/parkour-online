@@ -3509,5 +3509,101 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+
+<script>
+/* ---------- Язык интерфейса: RU / EN ---------- */
+(function(){
+  const LANG_KEY='pk_language';
+  let lang=localStorage.getItem(LANG_KEY)||'ru';
+  const originals=new WeakMap();
+
+  const T={
+    'Паркур':'Parkour','Высота:':'Height:','сальто:':'flips:','Идти':'Walk','Прыжок':'Jump','Сброс':'Reset','Поворот':'Turn','Сальто':'Flip','Прямое тело':'Straight body','Свернуться':'Tuck','Гравитация: Земля':'Gravity: Earth','Поверните телефон горизонтально':'Rotate your phone horizontally',
+    'Играть':'Play','Создать':'Create','Арена':'Arena','Магазин':'Shop','Скины':'Skins','Настройки':'Settings','Коды':'Codes','Монеты:':'Coins:','СЕТЬ':'MULTIPLAYER','ПРОФИЛЬ':'PROFILE','ПАРКУР':'PARKOUR','Рекорд:':'Record:',
+    'Введи код, чтобы открыть секретный скин.':'Enter a code to unlock a secret skin.','ПРОФИЛЬ':'PROFILE','Твой ID клиента:':'Your client ID:','ОБЩИЙ СЕРВЕР':'PUBLIC SERVER','Игра автоматически подключается к одному серверу. Все игроки находятся в общей комнате — коды не нужны.':'The game automatically connects to one server. All players are in the same room — no codes are needed.',
+    'НАСТРОЙКИ':'SETTINGS','ОСНОВНЫЕ':'GENERAL','КАМЕРА':'CAMERA','Расчленение: ВКЛ':'Dismemberment: ON','Гравитация: Земля':'Gravity: Earth','Спавн: Земля':'Spawn: Ground','Карта: Арена':'Map: Arena','Экранные кнопки: ВКЛ':'Touch controls: ON','Эффекты ранений: ВКЛ':'Injury effects: ON','Полно-экранный режим: ВЫКЛ':'Fullscreen: OFF','Управление':'Controls','Реплей':'Replay','Как играть':'How to play','Начать заново':'Restart','Главное меню':'Main menu','Назад':'Back','Сбросить камеру':'Reset camera',
+    'РЕЖИМ КАМЕРЫ':'CAMERA MODE','Свободная':'Free','Статичная':'Static','Свободная — плавно следует за игроком. Статичная — жёстко привязана к игроку.':'Free — smoothly follows the player. Static — locked to the player.','К ЧАСТИ ТЕЛА':'ATTACHED TO BODY PART','Голова':'Head','Шея':'Neck','Торс':'Torso','Таз':'Pelvis','Камера будет жёстко следовать за выбранной частью тела. Положение регулируется ползунками X/Y/Z.':'The camera will lock to the selected body part. Position is adjusted with the X/Y/Z sliders.','ТИП КАМЕРЫ':'CAMERA TYPE','НАСТРОЙКИ 3D':'3D SETTINGS','НАСТРОЙКИ 2D':'2D SETTINGS','Масштаб:':'Zoom:','РЕПЛЕЙ':'REPLAY','Запись начнётся автоматически во время игры.':'Recording starts automatically during gameplay.','▶ Смотреть':'▶ Watch','■ Стоп':'■ Stop','УПРАВЛЕНИЕ':'CONTROLS','Клавиатура (ПК)':'Keyboard (PC)','Экранные кнопки':'Touch buttons','По умолчанию':'Default','КАК ИГРАТЬ':'HOW TO PLAY',
+    'Магазин':'Shop','Шляпы':'Hats','Плащи':'Capes','Штаны':'Pants','Кофты':'Tops','Положение шляпы':'Hat position','(небольшая настройка)':'(small adjustment)','Влево / вправо':'Left / right','Вверх / вниз':'Up / down','Сбросить положение':'Reset position','Повернуть':'Rotate','СКИНЫ':'SKINS','Платформа':'Platform','Турник':'Bar','Удалить':'Delete','Старт':'Start','Рука':'Hand','Очистить':'Clear','▶ Играть':'▶ Play',
+    'Без шляпы':'No hat','Кепка':'Cap','Каска':'Hard hat','Ковбойская шляпа':'Cowboy hat','Цилиндр':'Top hat','Колпак мага':'Wizard hat','Корона':'Crown','Без плаща':'No cape','Красный плащ':'Red cape','Зелёный плащ':'Green cape','Синий плащ':'Blue cape','Чёрный плащ':'Black cape','Плащ героя':'Hero cape','Королевская мантия':'Royal mantle','Без штанов':'No pants','Джинсы-баги':'Baggy jeans','Карго':'Cargo pants','Спортивки':'Track pants','Кожаные':'Leather pants','Неон-джоггеры':'Neon joggers','Золотые баги':'Golden baggy pants','Без кофты':'No top','Худи серое':'Gray hoodie','Худи чёрное':'Black hoodie','Бомбер':'Bomber','Джинсовка':'Denim jacket','Кожанка':'Leather jacket','Пуховик':'Puffer jacket','Золотая куртка':'Golden jacket','Классика':'Classic','Красная майка':'Red shirt','Зелёный':'Green','Ниндзя':'Ninja','Манекен':'Dummy','Золотой':'Golden','Bacon — мой скин':'Bacon — my skin','RGB':'RGB',
+    'Купить ·':'Buy ·','Надеть':'Equip','Снять':'Unequip','Цвет':'Color','Радуга':'Rainbow','Перекрасить · 100':'Recolor · 100','Монеты':'Coins','САЛЬТО':'FLIP','ПРЫЖОК С':'JUMP FROM','НОКАУТ':'KNOCKOUT','Сотрясение':'Concussion','Перелом ноги':'Leg fracture','Перелом руки':'Arm fracture','Ушиб рёбер':'Rib bruise','Ушиб колена':'Knee bruise','Растяжение голеностопа':'Ankle sprain','Ушиб плеча':'Shoulder bruise','Растяжение запястья':'Wrist sprain','Ушиб':'Bruise'
+  };
+
+  function translateString(str){
+    if(!str) return str;
+    let out=str;
+    for(const [ru,en] of Object.entries(T)) out=out.split(ru).join(lang==='en'?en:ru);
+    if(lang==='en'){
+      out=out.replace(/Высота:\s*(\d+)\s*м\s*·\s*сальто:\s*(\d+)/i,'Height: $1 m · flips: $2');
+      out=out.replace(/Монеты:\s*(\d+)/i,'Coins: $1');
+      out=out.replace(/Рекорд:\s*(\d+)\s*м/i,'Record: $1 m');
+      out=out.replace(/ПРЫЖОК С\s*(\d+)\s*м/i,'JUMP FROM $1 m');
+      out=out.replace(/САЛЬТО(\s*×\d+)?\s*\+?(\d*)\s*монет/i,(m,n,g)=>'FLIP'+(n||'')+(g?'  +'+g+' coins':''));
+    }
+    return out;
+  }
+
+  function translateNode(node){
+    if(node.nodeType===Node.TEXT_NODE){
+      if(!originals.has(node)) originals.set(node,node.nodeValue);
+      node.nodeValue=translateString(originals.get(node));
+      return;
+    }
+    if(node.nodeType!==Node.ELEMENT_NODE) return;
+    const attrs=['placeholder','title','aria-label'];
+    for(const a of attrs){
+      if(node.hasAttribute(a)){
+        const key=node.tagName+'|'+a;
+        let rec=node._i18nAttrs||(node._i18nAttrs={});
+        if(rec[a]===undefined)rec[a]=node.getAttribute(a);
+        node.setAttribute(a,translateString(rec[a]));
+      }
+    }
+    for(const child of node.childNodes) translateNode(child);
+  }
+
+  function apply(){
+    document.documentElement.lang=lang;
+    translateNode(document.body);
+    const b=document.getElementById('mmFlag');
+    if(b)b.innerHTML=lang==='ru'?'🇷🇺':'🇺🇸';
+  }
+
+  window.setGameLanguage=function(next){
+    lang=next==='en'?'en':'ru';
+    localStorage.setItem(LANG_KEY,lang);
+    apply();
+  };
+
+  function addButton(){
+    const b=document.getElementById('mmFlag');
+    if(!b)return;
+    b.style.pointerEvents='auto';
+    b.style.cursor='pointer';
+    b.style.background='transparent';
+    b.style.border='0';
+    b.style.display='flex';
+    b.style.alignItems='center';
+    b.style.justifyContent='center';
+    b.style.fontSize='min(5vh,3vw)';
+    b.style.textShadow='0 1px 2px rgba(0,0,0,.35)';
+    b.setAttribute('role','button');
+    b.setAttribute('aria-label','Switch language');
+    b.onclick=()=>setGameLanguage(lang==='ru'?'en':'ru');
+  }
+
+  function boot(){
+    addButton();
+    apply();
+    const obs=new MutationObserver(muts=>{
+      if(muts.some(m=>m.addedNodes&&m.addedNodes.length)){
+        for(const m of muts)for(const n of m.addedNodes)translateNode(n);
+      }
+    });
+    obs.observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+
 </body>
 </html>
