@@ -30,6 +30,12 @@
   }
   #wrap{position:relative;width:100%;height:100%;background:linear-gradient(#2a99e8 0%,#78c6f2 60%,#b6e2f8 100%);}
   canvas{display:block;width:100%;height:100%;}
+
+  #mpPlayerRoster{position:absolute;right:12px;top:12%;width:176px;max-height:48vh;overflow:hidden auto;box-sizing:border-box;padding:10px 11px;border-radius:12px;background:rgba(12,24,43,.72);color:#fff;font-size:13px;line-height:1.45;pointer-events:none;z-index:8;backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.18);}
+  #mpPlayerRoster .mpr-title{font-weight:900;letter-spacing:.06em;margin-bottom:6px;opacity:.9;font-size:11px;text-transform:uppercase}
+  #mpPlayerRoster .mpr-player{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:2px 0}
+  #mpPlayerRoster .mpr-player.me{color:#ffe082;font-weight:800}
+  @media(max-width:700px),(orientation:portrait){#mpPlayerRoster{display:none!important;}}
   #ui{position:absolute;top:0;bottom:0;left:env(safe-area-inset-left,0px);right:env(safe-area-inset-right,0px);pointer-events:none;}
 
   .btn{
@@ -188,9 +194,14 @@
 
 </head>
 <body>
+<div id="globalUpdateOverlay" style="display:none;position:fixed;inset:0;z-index:2147483647;background:#080b14;color:#fff;align-items:center;justify-content:center;flex-direction:column;text-align:center;font-family:Arial,sans-serif">
+  <div style="font-size:clamp(48px,12vw,110px);font-weight:1000;letter-spacing:2px;text-shadow:0 0 28px #4aa3ff">ОБНОВА</div>
+  <div style="font-size:clamp(16px,3vw,26px);margin-top:18px;opacity:.9">Игра обновляется…</div>
+</div>
 <div id="wrap">
   <div id="ui">
     <div id="headImpactFx"></div>
+    <div id="mpPlayerRoster" aria-label="Players online" style="display:none"></div>
     <div id="score">Высота: 0 м · сальто: 0</div>
     <div id="toast"></div>
     <div id="hp"><div id="hpFill"></div><b id="hpTxt">❤ 100</b></div>
@@ -227,7 +238,7 @@
 
   <div id="codes" class="screen dim"><div class="panel" style="max-width:520px"><h2>КОДЫ</h2><p>Введи код, чтобы открыть секретный скин.</p><input id="codeInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Введите код" style="width:100%;box-sizing:border-box;padding:14px;border-radius:8px;border:0;font-size:18px;margin:8px 0;color:#222"><button class="mbtn" id="codeRedeem">Активировать</button><div id="codeMsg" style="min-height:1.5em;margin:10px 0"></div><button class="mbtn sec" id="codeBack">Назад</button></div></div>
 
-  <div id="profile" class="screen dim"><div class="panel" style="max-width:520px"><h2>ПРОФИЛЬ</h2><p>Твой ID клиента:</p><div id="profileId" style="padding:12px;background:rgba(255,255,255,.1);border-radius:8px;font-weight:800;overflow-wrap:anywhere">Загрузка ID…</div><button class="mbtn" id="profileCopyId" style="margin-top:8px">Скопировать ID</button><div id="profileCopyMsg" style="min-height:1.4em;font-size:14px" aria-live="polite"></div><p style="margin-top:18px">Ник над головой (виден игрокам в мультиплеере):</p><input id="profileNick" maxlength="20" autocomplete="off" placeholder="Введите ник" style="width:100%;box-sizing:border-box;padding:14px;border-radius:8px;border:0;font-size:18px;margin:8px 0;color:#222"><div id="profileTagAdminOnly" style="display:none"><p>Неймтаг над ником (только администратор):</p><input id="profileTag" maxlength="28" autocomplete="off" placeholder="Текст над ником" style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:0;font-size:17px;margin:6px 0;color:#222"><label style="display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0">Цвет неймтага <input id="profileTagColor" type="color" value="#ffd54a" style="width:54px;height:38px;border:0;background:transparent"></label></div><button class="mbtn" id="profileSave">Сохранить профиль</button><div id="profileMsg" style="min-height:1.5em"></div><div id="adminPanel" style="display:none;margin-top:18px;padding:12px;background:rgba(0,0,0,.18);border-radius:10px;text-align:left"><h3 style="text-align:center;margin:4px 0 12px">АДМИН-ПАНЕЛЬ</h3><div style="font-size:13px;margin-bottom:8px">Игроки онлайн · ник и ID. Для действий подключись к общему серверу.</div><div id="adminPlayers" style="max-height:220px;overflow:auto"></div><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><label>Сумма монет (+ выдать / − забрать)</label><input id="adminCoinAmount" type="number" step="1" placeholder="Например: 100 или -50" style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:0;margin:6px 0;color:#222"><button class="mbtn" id="adminApplyCoins">Применить к выбранному игроку</button><button class="mbtn sec" id="adminKick">Кикнуть выбранного игрока</button><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><label>Неймтаг выбранного игрока</label><input id="adminTagText" maxlength="28" autocomplete="off" placeholder="Текст над ником" style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:0;margin:6px 0;color:#222"><label style="display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0">Цвет неймтага <input id="adminTagColor" type="color" value="#ffd54a" style="width:54px;height:38px;border:0;background:transparent"></label><button class="mbtn" id="adminApplyTag">Установить неймтаг</button></div><div id="adminMsg" style="min-height:1.4em;font-size:13px"></div></div></div><button class="mbtn sec" id="profileBack">Назад</button></div></div>
+  <div id="profile" class="screen dim"><div class="panel" style="max-width:520px"><h2>ПРОФИЛЬ</h2><p>Твой ID клиента:</p><div id="profileId" style="padding:12px;background:rgba(255,255,255,.1);border-radius:8px;font-weight:800;overflow-wrap:anywhere">Загрузка ID…</div><button class="mbtn" id="profileCopyId" style="margin-top:8px">Скопировать ID</button><div id="profileCopyMsg" style="min-height:1.4em;font-size:14px" aria-live="polite"></div><p style="margin-top:18px">Ник над головой (виден игрокам в мультиплеере):</p><input id="profileNick" maxlength="20" autocomplete="off" placeholder="Введите ник" style="width:100%;box-sizing:border-box;padding:14px;border-radius:8px;border:0;font-size:18px;margin:8px 0;color:#222"><div id="profileTagAdminOnly" style="display:none"><p>Неймтаг над ником (только администратор):</p><input id="profileTag" maxlength="28" autocomplete="off" placeholder="Текст над ником" style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:0;font-size:17px;margin:6px 0;color:#222"><label style="display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0">Цвет неймтага <input id="profileTagColor" type="color" value="#ffd54a" style="width:54px;height:38px;border:0;background:transparent"></label></div><button class="mbtn" id="profileSave">Сохранить профиль</button><div id="profileMsg" style="min-height:1.5em"></div><div id="adminPanel" style="display:none;margin-top:18px;padding:12px;background:rgba(0,0,0,.18);border-radius:10px;text-align:left"><h3 style="text-align:center;margin:4px 0 12px">АДМИН-ПАНЕЛЬ</h3><div style="font-size:13px;margin-bottom:8px">Игроки онлайн · ник и ID. Для действий подключись к общему серверу.</div><div id="adminPlayers" style="max-height:220px;overflow:auto"></div><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><label>Сумма монет (+ выдать / − забрать)</label><input id="adminCoinAmount" type="number" step="1" placeholder="Например: 100 или -50" style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:0;margin:6px 0;color:#222"><button class="mbtn" id="adminApplyCoins">Применить к выбранному игроку</button><button class="mbtn sec" id="adminKick">Кикнуть выбранного игрока</button><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><label>Неймтаг выбранного игрока</label><input id="adminTagText" maxlength="28" autocomplete="off" placeholder="Текст над ником" style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:0;margin:6px 0;color:#222"><label style="display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0">Цвет неймтага <input id="adminTagColor" type="color" value="#ffd54a" style="width:54px;height:38px;border:0;background:transparent"></label><button class="mbtn" id="adminApplyTag">Установить неймтаг</button></div><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><button class="mbtn" id="adminUpdateAll" style="background:#b3261e;color:#fff">⟳ ОБНОВА — перезагрузить всех</button><div style="font-size:12px;opacity:.8;margin-top:5px">Покажет всем игрокам экран «Обнова» и перезагрузит игру.</div></div><div id="adminMsg" style="min-height:1.4em;font-size:13px"></div></div></div><button class="mbtn sec" id="profileBack">Назад</button></div></div>
   <div id="multiplayer" class="screen dim"><div id="mpPanel"><h2>ОБЩИЙ СЕРВЕР</h2><p>Игра автоматически подключается к одному серверу. Все игроки находятся в общей комнате — коды не нужны.</p><div id="mpRoom" style="font-weight:800;overflow-wrap:anywhere">Общая комната</div><div id="mpStatus">Подключаемся к серверу…</div><button class="mbtn" id="mpReconnect">Переподключиться</button><button class="mbtn sec" id="mpBack">Назад</button></div></div>
   <!-- настройки -->
   <div id="settings" class="screen dim">
@@ -3008,7 +3019,18 @@ $('sHome').addEventListener('click',goMain);
 /* ---------- Общий сетевой сервер (WebSocket) ---------- */
 let mpConn=null,mpLastSend=0,mpLocalParts=[],mpLocalId=null,mpLocalAppearanceSignature='';
 const MP_INTERPOLATION_DELAY=90; // запас времени для плавного отображения между сетевыми пакетами
-const mpRemotePlayers=new Map();let mpLocalNameSprite=null,mpLocalNameCanvas=null;
+const mpRemotePlayers=new Map();let mpLocalNameSprite=null,mpLocalNameCanvas=null,mpRosterSignature='';
+function mpRenderPlayerRoster(){
+  const box=$('mpPlayerRoster');if(!box)return;
+  const connected=!!(mpConn&&mpConn.readyState===WebSocket.OPEN);
+  if(!connected){box.style.display='none';mpRosterSignature='';return;}
+  const players=[{id:mpLocalId||mpClientId,nick:(store.get('pk_mp_nick','').trim()||'Player'),me:true}];
+  for(const [id,r] of mpRemotePlayers){if(r&&r.data)players.push({id,nick:(String(r.data.name||'Player').trim()||'Player'),me:false});}
+  const signature=players.map(p=>p.id+'|'+p.nick).join('\n');
+  box.style.display='block';if(signature===mpRosterSignature)return;mpRosterSignature=signature;
+  box.replaceChildren();const title=document.createElement('div');title.className='mpr-title';title.textContent=(store.get('pk_lang','ru')==='en'?'PLAYERS':'ИГРОКИ')+' · '+players.length;box.appendChild(title);
+  for(const p of players){const row=document.createElement('div');row.className='mpr-player'+(p.me?' me':'');row.textContent=p.nick;row.title=p.nick;box.appendChild(row);}
+}
 function mpStatus(t){const el=$('mpStatus');if(el)el.textContent=t;}
 function mpGetClientId(){let id=store.get('pk_client_id','');if(!id){id='P-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,10).toUpperCase();store.set('pk_client_id',id);}return id;}
 const mpClientId=mpGetClientId();
@@ -3043,7 +3065,7 @@ function mpSetRemoteName(r,name,tag,tagColor){
   if(top){ctx.font='bold 42px Arial';ctx.lineWidth=8;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(top,256,48,490);ctx.fillStyle=color;ctx.fillText(top,256,48,490);}
   ctx.font='bold 48px Arial';ctx.lineWidth=9;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(nick,256,135,490);ctx.fillStyle='#ffffff';ctx.fillText(nick,256,135,490);r.nameSprite.material.map.needsUpdate=true;
 }
-function mpRemoveRemote(id){const r=mpRemotePlayers.get(id);if(!r)return;scene.remove(r.group);r.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material.dispose();}});mpRemotePlayers.delete(id);}
+function mpRemoveRemote(id){const r=mpRemotePlayers.get(id);if(!r)return;scene.remove(r.group);r.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material.dispose();}});mpRemotePlayers.delete(id);mpRenderPlayerRoster();}
 function mpClean(){if(mpConn){try{mpConn.close();}catch(_){}}mpConn=null;mpLocalId=null;mpRefreshProfileId();for(const id of [...mpRemotePlayers.keys()])mpRemoveRemote(id);}
 function mpGetLocalParts(){
   const sources=[...limbs,...joints,hair,eye];
@@ -3071,8 +3093,12 @@ function mpApplyAppearance(data,id){
 function mpHandlePacket(packet){
   if(!packet||typeof packet!=='object')return;
   if(packet.type==='welcome'){
-    mpLocalId=packet.id;mpRefreshProfileId();mpStatus('Подключено к общему серверу. Игроков: '+(packet.players?.length||0));if(Number.isFinite(packet.coins))mpApplyServerCoins(packet.coins);if(mpIsAdmin()){const ap=$('adminPanel');if(ap)ap.style.display='block';mpRefreshAdminList();}
+    mpLocalId=packet.id;mpRefreshProfileId();mpRenderPlayerRoster();mpStatus('Подключено к общему серверу. Игроков: '+(packet.players?.length||0));if(Number.isFinite(packet.coins))mpApplyServerCoins(packet.coins);if(mpIsAdmin()){const ap=$('adminPanel');if(ap)ap.style.display='block';mpRefreshAdminList();}
     for(const p of (packet.players||[])){if(p.appearance)mpApplyAppearance(p.appearance,p.id);const r=mpRemotePlayers.get(p.id);if(r&&p.state)mpStoreRemoteState(r,p.state);else if(p.state){const group=new THREE.Group();scene.add(group);const nr={group,parts:[],data:null,snapshots:[]};mpRemotePlayers.set(p.id,nr);mpStoreRemoteState(nr,p.state);}}
+  }else if(packet.type==='update-all'){
+    const overlay=$('globalUpdateOverlay');if(overlay){overlay.style.display='flex';document.body.style.overflow='hidden';}
+    // Даём экрану «Обнова» отобразиться, затем обновляем страницу.
+    setTimeout(()=>location.reload(),4000);
   }else if(packet.type==='peer-left'){mpRemoveRemote(packet.id);mpStatus('Игрок отключился. На сервере ещё '+mpRemotePlayers.size+' других игроков.');}
   else if(packet.type==='admin-player-list'&&mpIsAdmin()){mpRenderAdminPlayers(packet.players||[]);}
   else if(packet.type==='admin-result'){const el=$('adminMsg');if(el)el.textContent=packet.message||'Готово';}
@@ -3087,7 +3113,7 @@ function mpHandlePacket(packet){
 }
 function mpStoreRemoteState(r,data){
   const t=performance.now();
-  r.data=data;mpSetRemoteName(r,data.name,data.tagText,data.tagColor);
+  r.data=data;mpSetRemoteName(r,data.name,data.tagText,data.tagColor);mpRenderPlayerRoster();
   if(!Array.isArray(r.snapshots))r.snapshots=[];
   r.snapshots.push({t,data});
   // Достаточно нескольких снимков для интерполяции с небольшим сетевым запасом.
@@ -3120,6 +3146,7 @@ function mpConnectServer(){
   const proto=location.protocol==='https:'?'wss:':'ws:';const url=proto+'//'+location.host+'/ws';mpStatus('Подключаемся к общему серверу…');
   try{mpConn=new WebSocket(url);}catch(e){mpStatus('Не удалось создать подключение.');return;}
   mpConn.addEventListener('open',()=>{
+    mpRenderPlayerRoster();
     mpStatus('Соединение установлено. Загружаем игроков…');
     mpSend({type:'hello',clientId:mpClientId,nick:(store.get('pk_mp_nick','').trim()||'Player'),tagText:store.get('pk_mp_tag',''),tagColor:store.get('pk_mp_tag_color','#ffd54a'),initialCoins:coins});
     // Send the current appearance immediately on connection, without requiring the player to reselect the skin.
@@ -3129,19 +3156,20 @@ function mpConnectServer(){
     try{mpConn.send(JSON.stringify({type:'appearance',parts}));}catch(_){}
   });
   mpConn.addEventListener('message',ev=>{try{mpHandlePacket(JSON.parse(ev.data));}catch(e){console.warn('Bad multiplayer packet',e);}});
-  mpConn.addEventListener('close',()=>{mpStatus('Нет соединения с сервером. Пробуем подключиться снова…');setTimeout(()=>{if(!mpConn||mpConn.readyState===WebSocket.CLOSED)mpConnectServer();},4000);});
+  mpConn.addEventListener('close',()=>{mpRenderPlayerRoster();mpStatus('Нет соединения с сервером. Пробуем подключиться снова…');setTimeout(()=>{if(!mpConn||mpConn.readyState===WebSocket.CLOSED)mpConnectServer();},4000);});
   mpConn.addEventListener('error',()=>mpStatus('Ошибка соединения. Сервер ещё запускается или недоступен.'));
 }
 $('mpReconnect').addEventListener('click',mpConnectServer);
 $('mpBack').addEventListener('click',()=>showScreen('main'));
 $('mmMulti').addEventListener('click',()=>{showScreen('multiplayer');paused=true;mpConnectServer();});
 $('mmProfile').addEventListener('click',()=>{const n=store.get('pk_mp_nick','Player').trim()||'Player';$('profileNick').value=n;if(mpIsAdmin()){$('profileTag').value=store.get('pk_mp_tag','');$('profileTagColor').value=store.get('pk_mp_tag_color','#ffd54a');}$('profileMsg').textContent='';mpRefreshProfileId();$('profileTagAdminOnly').style.display=mpIsAdmin()?'block':'none';$('adminPanel').style.display=mpIsAdmin()?'block':'none';showScreen('profile');paused=true;if(!mpLocalId)mpConnectServer();else mpRefreshAdminList();});
-$('profileSave').addEventListener('click',()=>{const nick=$('profileNick').value.trim().replace(/[<>\\]/g,'').slice(0,20)||'Player';store.set('pk_mp_nick',nick);let tag=store.get('pk_mp_tag',''),color=store.get('pk_mp_tag_color','#ffd54a');if(mpIsAdmin()){tag=$('profileTag').value.trim().replace(/[<>\\]/g,'').slice(0,28);color=$('profileTagColor').value;store.set('pk_mp_tag',tag);store.set('pk_mp_tag_color',color);}$('profileNick').value=nick;if(mpIsAdmin())$('profileTag').value=tag;$('profileMsg').textContent='Профиль сохранён!';mpSend({type:'profile',nick:nick||'Player',tagText:tag,tagColor:color});mpUpdateLocalNameTag();});
+$('profileSave').addEventListener('click',()=>{const nick=$('profileNick').value.trim().replace(/[<>\\]/g,'').slice(0,20)||'Player';store.set('pk_mp_nick',nick);let tag=store.get('pk_mp_tag',''),color=store.get('pk_mp_tag_color','#ffd54a');if(mpIsAdmin()){tag=$('profileTag').value.trim().replace(/[<>\\]/g,'').slice(0,28);color=$('profileTagColor').value;store.set('pk_mp_tag',tag);store.set('pk_mp_tag_color',color);}$('profileNick').value=nick;if(mpIsAdmin())$('profileTag').value=tag;$('profileMsg').textContent='Профиль сохранён!';mpSend({type:'profile',nick:nick||'Player',tagText:tag,tagColor:color});mpUpdateLocalNameTag();mpRenderPlayerRoster();});
 $('profileCopyId').addEventListener('click',async()=>{const msg=$('profileCopyMsg');try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(mpClientId);}else{const t=document.createElement('textarea');t.value=mpClientId;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();const ok=document.execCommand('copy');t.remove();if(!ok)throw new Error('copy failed');}msg.textContent='ID скопирован!';}catch(_){msg.textContent='Не удалось скопировать. Выдели ID и скопируй вручную.';}});
 $('profileBack').addEventListener('click',goMain);
 $('adminApplyCoins').addEventListener('click',()=>{if(!mpIsAdmin()||!mpAdminSelectedId){$('adminMsg').textContent='Сначала выбери игрока.';return;}const amount=Number($('adminCoinAmount').value);if(!Number.isFinite(amount)||!Number.isInteger(amount)||amount===0){$('adminMsg').textContent='Введи целое число, не равное нулю.';return;}mpSend({type:'admin-coins',targetId:mpAdminSelectedId,amount});});
 $('adminKick').addEventListener('click',()=>{if(!mpIsAdmin()||!mpAdminSelectedId){$('adminMsg').textContent='Сначала выбери игрока.';return;}if(mpAdminSelectedId===mpClientId){$('adminMsg').textContent='Нельзя кикнуть самого себя.';return;}mpSend({type:'admin-kick',targetId:mpAdminSelectedId});});
 $('adminApplyTag').addEventListener('click',()=>{if(!mpIsAdmin()||!mpAdminSelectedId){$('adminMsg').textContent='Сначала выбери игрока.';return;}const tag=$('adminTagText').value.trim().replace(/[<>\\]/g,'').slice(0,28);const color=$('adminTagColor').value;mpSend({type:'admin-tag',targetId:mpAdminSelectedId,tagText:tag,tagColor:color});});
+$('adminUpdateAll').addEventListener('click',()=>{if(!mpIsAdmin()){ $('adminMsg').textContent='Нет доступа.';return;}if(!mpConn||mpConn.readyState!==WebSocket.OPEN){$('adminMsg').textContent='Сначала подключись к общему серверу.';return;}if(!confirm('Показать всем игрокам экран «Обнова» и перезагрузить игру?'))return;mpSend({type:'admin-update-all'});$('adminMsg').textContent='Команда обновления отправлена серверу.';});
 
 function mpResolvePlayerCollision(remote,dt){
   const clamp01=(v)=>Math.max(0,Math.min(1,v));
@@ -3214,7 +3242,7 @@ function mpUpdate(dt,now){
     try{mpConn.send(JSON.stringify({type:'state',x,y,face,phys:mode===PHYS,angle:mode===PHYS?BD[0].a:0,vx:mode===PHYS?BD[0].vx:C.vx,vy:mode===PHYS?BD[0].vy:C.vy,by:C.by,bodyH:BODY_H,bodyW:HW,bodies,parts,name:(store.get('pk_mp_nick','').trim()||'Player'),tagText:store.get('pk_mp_tag',''),tagColor:store.get('pk_mp_tag_color','#ffd54a')}));}catch(_){}
   }
   for(const [id,r] of mpRemotePlayers){const d=r.data;if(!d)continue;
-    if(r.nameSprite){r.nameSprite.position.set((Number.isFinite(d.x)?d.x:0),(Number.isFinite(d.y)?d.y:0)+1.18,0);r.nameSprite.visible=true;}
+    if(r.nameSprite){r.nameSprite.position.set((Number.isFinite(d.x)?d.x:0),(Number.isFinite(d.y)?d.y:0)+1.42,0);r.nameSprite.visible=true;}
     const renderParts=mpGetInterpolatedParts(r,now);if(r.parts.length&&Array.isArray(renderParts)){const n=Math.min(renderParts.length,r.parts.length);for(let i=0;i<n;i++){const part=renderParts[i],obj=r.parts[i];if(part&&Array.isArray(part.m)&&part.m.length===16){obj.matrix.fromArray(part.m);obj.visible=!!part.v;const mats=Array.isArray(obj.material)?obj.material:[obj.material];for(const mat of mats){if(part.c!==null&&mat.color)mat.color.setHex(part.c);if(Number.isFinite(part.o))mat.opacity=part.o;}if(Array.isArray(part.clothPos)&&obj.geometry.attributes.position&&part.clothPos.length===obj.geometry.attributes.position.array.length){obj.geometry.attributes.position.array.set(part.clothPos);obj.geometry.attributes.position.needsUpdate=true;obj.geometry.computeVertexNormals();}if(Array.isArray(part.clothCol)&&obj.geometry.attributes.color&&part.clothCol.length===obj.geometry.attributes.color.array.length){obj.geometry.attributes.color.array.set(part.clothCol);obj.geometry.attributes.color.needsUpdate=true;}}}}
     mpResolvePlayerCollision(d,dt);
   }
