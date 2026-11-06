@@ -163,6 +163,14 @@
     position:absolute;right:1.25%;bottom:2.8%;width:6.7%;height:10%;
     background:linear-gradient(#fff 0 33.3%,#0039a6 33.3% 66.6%,#d52b1e 66.6%);pointer-events:none;
   }
+  #mmTelegram{
+    position:absolute;right:8.5%;bottom:2.8%;width:6.7%;height:10%;
+    display:flex;align-items:center;justify-content:center;box-sizing:border-box;
+    border:1px solid rgba(255,255,255,.65);border-radius:10px;background:#229ed9;color:#fff;
+    font:900 min(3.2vh,2.1vw) inherit;letter-spacing:.04em;cursor:pointer;pointer-events:auto;
+    text-shadow:0 1px 2px rgba(0,0,0,.25);touch-action:manipulation;
+  }
+  #mmTelegram:active{filter:brightness(1.15);transform:scale(.97)}
 
   /* магазин */
   #shopPanel{pointer-events:auto;position:absolute;right:2%;top:3%;bottom:3%;width:48%;max-height:none;display:flex;flex-direction:column;}
@@ -233,6 +241,7 @@
     <div id="mmCoins">Монеты: 0</div>
     <button class="mm" id="mmMulti" style="left:37.9%;top:35.7%;width:24.2%;height:13.9%;justify-content:center;padding-left:0"><span class="ic">🌐</span>СЕТЬ</button>
     <button class="mm" id="mmProfile" style="left:5.9%;top:52.1%;width:24.2%;height:13.9%;justify-content:flex-start;padding-left:9%"><span class="ic">👤</span>ПРОФИЛЬ</button>
+    <button id="mmTelegram" type="button" aria-label="Telegram">TG</button>
     <div id="mmFlag"></div>
   </div>
 
@@ -3605,6 +3614,11 @@ if ('serviceWorker' in navigator) {
   };
 
   function addButton(){
+    const tg=document.getElementById('mmTelegram');
+    if(tg){
+      tg.onclick=()=>window.open('https://t.me/ParKurNEWS','_blank','noopener,noreferrer');
+      tg.setAttribute('aria-label','Telegram ParKurNEWS');
+    }
     const b=document.getElementById('mmFlag');
     if(!b)return;
     b.style.pointerEvents='auto';
