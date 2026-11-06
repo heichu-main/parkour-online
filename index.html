@@ -35,7 +35,7 @@
   #mpPlayerRoster .mpr-title{font-weight:900;letter-spacing:.06em;margin-bottom:6px;opacity:.9;font-size:11px;text-transform:uppercase}
   #mpPlayerRoster .mpr-player{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:2px 0}
   #mpPlayerRoster .mpr-player.me{color:#ffe082;font-weight:800}
-  @media(max-width:700px),(orientation:portrait){#mpPlayerRoster{display:none!important;}}
+  @media(max-width:700px),(orientation:portrait){#mpPlayerRoster{display:block!important;left:5px;right:auto;top:9%;width:112px;max-height:30vh;padding:6px 7px;font-size:10px;line-height:1.3;border-radius:9px;}#mpPlayerRoster .mpr-title{font-size:9px;margin-bottom:3px}#mpPlayerRoster .mpr-player{padding:1px 0;}}
   #ui{position:absolute;top:0;bottom:0;left:env(safe-area-inset-left,0px);right:env(safe-area-inset-right,0px);pointer-events:none;}
 
   .btn{
@@ -247,7 +247,7 @@
 
   <div id="codes" class="screen dim"><div class="panel" style="max-width:520px"><h2>КОДЫ</h2><p>Введи код, чтобы открыть секретный скин.</p><input id="codeInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Введите код" style="width:100%;box-sizing:border-box;padding:14px;border-radius:8px;border:0;font-size:18px;margin:8px 0;color:#222"><button class="mbtn" id="codeRedeem">Активировать</button><div id="codeMsg" style="min-height:1.5em;margin:10px 0"></div><button class="mbtn sec" id="codeBack">Назад</button></div></div>
 
-  <div id="profile" class="screen dim"><div class="panel" style="max-width:520px"><h2>ПРОФИЛЬ</h2><p>Твой ID клиента:</p><div id="profileId" style="padding:12px;background:rgba(255,255,255,.1);border-radius:8px;font-weight:800;overflow-wrap:anywhere">Загрузка ID…</div><button class="mbtn" id="profileCopyId" style="margin-top:8px">Скопировать ID</button><div id="profileCopyMsg" style="min-height:1.4em;font-size:14px" aria-live="polite"></div><p style="margin-top:18px">Ник над головой (виден игрокам в мультиплеере):</p><input id="profileNick" maxlength="20" autocomplete="off" placeholder="Введите ник" style="width:100%;box-sizing:border-box;padding:14px;border-radius:8px;border:0;font-size:18px;margin:8px 0;color:#222"><div id="profileTagAdminOnly" style="display:none"><p>Неймтаг над ником (только администратор):</p><input id="profileTag" maxlength="28" autocomplete="off" placeholder="Текст над ником" style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:0;font-size:17px;margin:6px 0;color:#222"><label style="display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0">Цвет неймтага <input id="profileTagColor" type="color" value="#ffd54a" style="width:54px;height:38px;border:0;background:transparent"></label></div><button class="mbtn" id="profileSave">Сохранить профиль</button><div id="profileMsg" style="min-height:1.5em"></div><div id="adminPanel" style="display:none;margin-top:18px;padding:12px;background:rgba(0,0,0,.18);border-radius:10px;text-align:left"><h3 style="text-align:center;margin:4px 0 12px">АДМИН-ПАНЕЛЬ</h3><div style="font-size:13px;margin-bottom:8px">Игроки онлайн · ник и ID. Для действий подключись к общему серверу.</div><div id="adminPlayers" style="max-height:220px;overflow:auto"></div><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><label>Сумма монет (+ выдать / − забрать)</label><input id="adminCoinAmount" type="number" step="1" placeholder="Например: 100 или -50" style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:0;margin:6px 0;color:#222"><button class="mbtn" id="adminApplyCoins">Применить к выбранному игроку</button><button class="mbtn sec" id="adminKick">Кикнуть выбранного игрока</button><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><label>Неймтаг выбранного игрока</label><input id="adminTagText" maxlength="28" autocomplete="off" placeholder="Текст над ником" style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:0;margin:6px 0;color:#222"><label style="display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0">Цвет неймтага <input id="adminTagColor" type="color" value="#ffd54a" style="width:54px;height:38px;border:0;background:transparent"></label><button class="mbtn" id="adminApplyTag">Установить неймтаг</button></div><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><button class="mbtn" id="adminUpdateAll" style="background:#b3261e;color:#fff">⟳ ОБНОВА — перезагрузить всех</button><div style="font-size:12px;opacity:.8;margin-top:5px">Покажет всем игрокам экран «Обнова» и перезагрузит игру.</div></div><div id="adminMsg" style="min-height:1.4em;font-size:13px"></div></div></div><button class="mbtn sec" id="profileBack">Назад</button></div></div>
+  <div id="profile" class="screen dim"><div class="panel" style="max-width:520px"><h2>ПРОФИЛЬ</h2><p>Твой ID клиента:</p><div id="profileId" style="padding:12px;background:rgba(255,255,255,.1);border-radius:8px;font-weight:800;overflow-wrap:anywhere">Загрузка ID…</div><button class="mbtn" id="profileCopyId" style="margin-top:8px">Скопировать ID</button><div id="profileCopyMsg" style="min-height:1.4em;font-size:14px" aria-live="polite"></div><p style="margin-top:18px">Ник над головой (виден игрокам в мультиплеере):</p><input id="profileNick" maxlength="20" autocomplete="off" placeholder="Введите ник" style="width:100%;box-sizing:border-box;padding:14px;border-radius:8px;border:0;font-size:18px;margin:8px 0;color:#222"><div id="nickStylePanel" style="margin:10px 0;padding:12px;border-radius:10px;background:rgba(0,0,0,.18)"><div style="font-weight:800;margin-bottom:8px">Цвет никнейма</div><div id="nickColorLocked"><button class="mbtn" id="buyNickColor">Открыть смену цвета · 100 монет</button></div><div id="nickColorControls" style="display:none"><label style="display:flex;align-items:center;justify-content:center;gap:8px;margin:7px 0">Выбрать цвет <input id="nickColorPicker" type="color" value="#ffffff" style="width:48px;height:34px;border:0;background:transparent"></label><button class="mbtn" id="buyNickRainbow">Купить переливание радугой · 500 монет</button><label id="nickRainbowToggleWrap" style="display:none;align-items:center;justify-content:center;gap:8px;margin:8px 0"><input id="nickRainbowToggle" type="checkbox"> Включить радугу</label></div><div id="nickStyleMsg" style="font-size:12px;min-height:1.3em"></div></div><div id="profileTagAdminOnly" style="display:none"><p>Неймтаг над ником (только администратор):</p><input id="profileTag" maxlength="28" autocomplete="off" placeholder="Текст над ником" style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:0;font-size:17px;margin:6px 0;color:#222"><label style="display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0">Цвет неймтага <input id="profileTagColor" type="color" value="#ffd54a" style="width:54px;height:38px;border:0;background:transparent"></label></div><button class="mbtn" id="profileSave">Сохранить профиль</button><div id="profileMsg" style="min-height:1.5em"></div><div id="adminPanel" style="display:none;margin-top:18px;padding:12px;background:rgba(0,0,0,.18);border-radius:10px;text-align:left"><h3 style="text-align:center;margin:4px 0 12px">АДМИН-ПАНЕЛЬ</h3><div style="font-size:13px;margin-bottom:8px">Игроки онлайн · ник и ID. Для действий подключись к общему серверу.</div><div id="adminPlayers" style="max-height:220px;overflow:auto"></div><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><label>Сумма монет (+ выдать / − забрать)</label><input id="adminCoinAmount" type="number" step="1" placeholder="Например: 100 или -50" style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:0;margin:6px 0;color:#222"><button class="mbtn" id="adminApplyCoins">Применить к выбранному игроку</button><button class="mbtn sec" id="adminKick">Кикнуть выбранного игрока</button><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><label>Неймтаг выбранного игрока</label><input id="adminTagText" maxlength="28" autocomplete="off" placeholder="Текст над ником" style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:0;margin:6px 0;color:#222"><label style="display:flex;align-items:center;gap:10px;justify-content:center;margin:8px 0">Цвет неймтага <input id="adminTagColor" type="color" value="#ffd54a" style="width:54px;height:38px;border:0;background:transparent"></label><button class="mbtn" id="adminApplyTag">Установить неймтаг</button></div><div style="margin-top:12px;border-top:1px solid #ffffff55;padding-top:12px"><button class="mbtn" id="adminUpdateAll" style="background:#b3261e;color:#fff">⟳ ОБНОВА — перезагрузить всех</button><div style="font-size:12px;opacity:.8;margin-top:5px">Покажет всем игрокам экран «Обнова» и перезагрузит игру.</div></div><div id="adminMsg" style="min-height:1.4em;font-size:13px"></div></div></div><button class="mbtn sec" id="profileBack">Назад</button></div></div>
   <div id="multiplayer" class="screen dim"><div id="mpPanel"><h2>ОБЩИЙ СЕРВЕР</h2><p>Игра автоматически подключается к одному серверу. Все игроки находятся в общей комнате — коды не нужны.</p><div id="mpRoom" style="font-weight:800;overflow-wrap:anywhere">Общая комната</div><div id="mpStatus">Подключаемся к серверу…</div><button class="mbtn" id="mpReconnect">Переподключиться</button><button class="mbtn sec" id="mpBack">Назад</button></div></div>
   <!-- настройки -->
   <div id="settings" class="screen dim">
@@ -3029,18 +3029,23 @@ $('sHome').addEventListener('click',goMain);
 let mpConn=null,mpLastSend=0,mpLocalParts=[],mpLocalId=null,mpLocalAppearanceSignature='';
 const MP_INTERPOLATION_DELAY=90; // запас времени для плавного отображения между сетевыми пакетами
 const mpRemotePlayers=new Map();let mpLocalNameSprite=null,mpLocalNameCanvas=null,mpRosterSignature='';
+function mpNickColor(){return /^#[0-9a-fA-F]{6}$/.test(store.get('pk_nick_color','#ffffff'))?store.get('pk_nick_color','#ffffff'):'#ffffff';}
+function mpNickRainbow(){return !!store.get('pk_nick_rainbow',false);}
+function mpHueColor(){return 'hsl('+Math.floor((performance.now()/18)%360)+',100%,60%)';}
+function mpRefreshNickStyle(){const owned=!!store.get('pk_nick_color_owned',false),rain=!!store.get('pk_nick_rainbow_owned',false);const locked=$('nickColorLocked'),controls=$('nickColorControls'),picker=$('nickColorPicker'),buy=$('buyNickRainbow'),wrap=$('nickRainbowToggleWrap'),toggle=$('nickRainbowToggle');if(locked)locked.style.display=owned?'none':'block';if(controls)controls.style.display=owned?'block':'none';if(picker)picker.value=mpNickColor();if(buy)buy.style.display=rain?'none':'block';if(wrap)wrap.style.display=rain?'flex':'none';if(toggle)toggle.checked=mpNickRainbow();}
+
 function mpRenderPlayerRoster(){
   const box=$('mpPlayerRoster');if(!box)return;
   const connected=!!(mpConn&&mpConn.readyState===WebSocket.OPEN);
   if(!connected){box.style.display='none';mpRosterSignature='';return;}
   const localNick=(store.get('pk_mp_nick','').trim()||'Player');
   const localTag=store.get('pk_mp_tag','').trim().replace(/[<>]/g,'').slice(0,28);
-  const players=[{id:mpLocalId||mpClientId,nick:localNick,tag:localTag,me:true}];
-  for(const [id,r] of mpRemotePlayers){if(r&&r.data)players.push({id,nick:(String(r.data.name||'Player').trim()||'Player'),tag:String(r.data.tagText||'').trim().replace(/[<>]/g,'').slice(0,28),me:false});}
-  const signature=players.map(p=>p.id+'|'+p.nick+'|'+p.tag).join('\n');
+  const players=[{id:mpLocalId||mpClientId,nick:localNick,tag:localTag,me:true,nickColor:mpNickColor(),nickRainbow:mpNickRainbow()}];
+  for(const [id,r] of mpRemotePlayers){if(r&&r.data)players.push({id,nick:(String(r.data.name||'Player').trim()||'Player'),tag:String(r.data.tagText||'').trim().replace(/[<>]/g,'').slice(0,28),me:false,nickColor:r.data.nickColor||'#ffffff',nickRainbow:!!r.data.nickRainbow});}
+  const signature=players.map(p=>p.id+'|'+p.nick+'|'+p.tag+'|'+p.nickColor+'|'+p.nickRainbow).join('\n');
   box.style.display='block';if(signature===mpRosterSignature)return;mpRosterSignature=signature;
   box.replaceChildren();const title=document.createElement('div');title.className='mpr-title';title.textContent=(store.get('pk_lang','ru')==='en'?'PLAYERS':'ИГРОКИ')+' · '+players.length;box.appendChild(title);
-  for(const p of players){const row=document.createElement('div');row.className='mpr-player'+(p.me?' me':'');row.textContent=p.tag?p.nick+' · '+p.tag:p.nick;row.title=row.textContent;box.appendChild(row);}
+  for(const p of players){const row=document.createElement('div');row.className='mpr-player'+(p.me?' me':'');row.textContent=p.tag?p.nick+' · '+p.tag:p.nick;row.title=row.textContent;if(p.nickRainbow)row.style.color=mpHueColor();else if(/^#[0-9a-fA-F]{6}$/.test(p.nickColor||''))row.style.color=p.nickColor;box.appendChild(row);}
 }
 function mpStatus(t){const el=$('mpStatus');if(el)el.textContent=t;}
 function mpGetClientId(){let id=store.get('pk_client_id','');if(!id){id='P-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,10).toUpperCase();store.set('pk_client_id',id);}return id;}
@@ -3052,7 +3057,7 @@ function mpUpdateLocalNameTag(){
   if(!active){if(mpLocalNameSprite)mpLocalNameSprite.visible=false;return;}
   if(!mpLocalNameSprite){mpLocalNameCanvas=document.createElement('canvas');mpLocalNameCanvas.width=512;mpLocalNameCanvas.height=190;const tex=new THREE.CanvasTexture(mpLocalNameCanvas);const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});mpLocalNameSprite=new THREE.Sprite(mat);mpLocalNameSprite.scale.set(1.9,.7,1);scene.add(mpLocalNameSprite);}
   const nick=(store.get('pk_mp_nick','').trim().replace(/[<>]/g,'').slice(0,20)||'Player');const tag=store.get('pk_mp_tag','').trim().replace(/[<>]/g,'').slice(0,28);const color=/^#[0-9a-fA-F]{6}$/.test(store.get('pk_mp_tag_color','#ffd54a'))?store.get('pk_mp_tag_color','#ffd54a'):'#ffd54a';
-  const cv=mpLocalNameCanvas,ctx=cv.getContext('2d');ctx.clearRect(0,0,512,190);ctx.textAlign='center';ctx.textBaseline='middle';if(tag){ctx.font='bold 42px Arial';ctx.lineWidth=8;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(tag,256,48,490);ctx.fillStyle=color;ctx.fillText(tag,256,48,490);}ctx.font='bold 48px Arial';ctx.lineWidth=9;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(nick,256,135,490);ctx.fillStyle='#ffffff';ctx.fillText(nick,256,135,490);mpLocalNameSprite.material.map.needsUpdate=true;
+  const cv=mpLocalNameCanvas,ctx=cv.getContext('2d');ctx.clearRect(0,0,512,190);ctx.textAlign='center';ctx.textBaseline='middle';if(tag){ctx.font='bold 42px Arial';ctx.lineWidth=8;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(tag,256,48,490);ctx.fillStyle=color;ctx.fillText(tag,256,48,490);}ctx.font='bold 48px Arial';ctx.lineWidth=9;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(nick,256,135,490);ctx.fillStyle=mpNickRainbow()?mpHueColor():mpNickColor();ctx.fillText(nick,256,135,490);mpLocalNameSprite.material.map.needsUpdate=true;
   const x=mode===PHYS?BD[0].x:C.x,y=mode===PHYS?BD[0].y:C.by+HOVER;mpLocalNameSprite.position.set(x,y+1.52,0);mpLocalNameSprite.visible=true;
 }
 const MP_ADMIN_ID='P-MW2H4MHO-NRQLO3BP';let mpAdminSelectedId='';
@@ -3066,7 +3071,7 @@ function mpRenderAdminPlayers(list){
 function mpRefreshAdminList(){if(mpIsAdmin())mpSend({type:'admin-list'});}
 function mpApplyServerCoins(value){if(!Number.isFinite(Number(value)))return;coins=Math.max(0,Math.floor(Number(value)));store.set('pk_coins',coins);updateMainInfo();const sc=$('shopCoins');if(sc)sc.textContent='Монеты: '+coins;toast('Баланс обновлён: '+coins+' монет');}
 
-function mpSetRemoteName(r,name,tag,tagColor){
+function mpSetRemoteName(r,name,tag,tagColor,nickColor,nickRainbow){
   if(!r||!r.group)return;
   const nick=(String(name||'Игрок').trim().replace(/[<>]/g,'').slice(0,20)||'Игрок');
   const top=(String(tag||'').trim().replace(/[<>]/g,'').slice(0,28));
@@ -3074,7 +3079,7 @@ function mpSetRemoteName(r,name,tag,tagColor){
   if(!r.nameSprite){const cv=document.createElement('canvas');cv.width=512;cv.height=190;const tex=new THREE.CanvasTexture(cv);const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});const sp=new THREE.Sprite(mat);sp.scale.set(1.9,.7,1);sp.position.set(0,2.6,0);r.group.add(sp);r.nameSprite=sp;r.nameCanvas=cv;}
   const cv=r.nameCanvas,ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);ctx.textAlign='center';ctx.textBaseline='middle';
   if(top){ctx.font='bold 42px Arial';ctx.lineWidth=8;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(top,256,48,490);ctx.fillStyle=color;ctx.fillText(top,256,48,490);}
-  ctx.font='bold 48px Arial';ctx.lineWidth=9;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(nick,256,135,490);ctx.fillStyle='#ffffff';ctx.fillText(nick,256,135,490);r.nameSprite.material.map.needsUpdate=true;
+  ctx.font='bold 48px Arial';ctx.lineWidth=9;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(nick,256,135,490);ctx.fillStyle=nickRainbow?mpHueColor():(/^#[0-9a-fA-F]{6}$/.test(String(nickColor||''))?nickColor:'#ffffff');ctx.fillText(nick,256,135,490);r.nameSprite.material.map.needsUpdate=true;
 }
 function mpRemoveRemote(id){const r=mpRemotePlayers.get(id);if(!r)return;scene.remove(r.group);r.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material.dispose();}});mpRemotePlayers.delete(id);mpRenderPlayerRoster();}
 function mpClean(){if(mpConn){try{mpConn.close();}catch(_){}}mpConn=null;mpLocalId=null;mpRefreshProfileId();for(const id of [...mpRemotePlayers.keys()])mpRemoveRemote(id);}
@@ -3113,7 +3118,7 @@ function mpHandlePacket(packet){
   }else if(packet.type==='peer-left'){mpRemoveRemote(packet.id);mpStatus('Игрок отключился. На сервере ещё '+mpRemotePlayers.size+' других игроков.');}
   else if(packet.type==='admin-player-list'&&mpIsAdmin()){mpRenderAdminPlayers(packet.players||[]);}
   else if(packet.type==='admin-result'){const el=$('adminMsg');if(el)el.textContent=packet.message||'Готово';}
-  else if(packet.type==='admin-tag-update'&&packet.id){if(packet.id===mpLocalId){store.set('pk_mp_tag',packet.tagText||'');store.set('pk_mp_tag_color',packet.tagColor||'#ffd54a');mpUpdateLocalNameTag();mpRenderPlayerRoster();}else{let r=mpRemotePlayers.get(packet.id);if(r&&r.data){r.data.tagText=packet.tagText||'';r.data.tagColor=packet.tagColor||'#ffd54a';mpSetRemoteName(r,r.data.name,r.data.tagText,r.data.tagColor);mpRenderPlayerRoster();}}}
+  else if(packet.type==='admin-tag-update'&&packet.id){if(packet.id===mpLocalId){store.set('pk_mp_tag',packet.tagText||'');store.set('pk_mp_tag_color',packet.tagColor||'#ffd54a');mpUpdateLocalNameTag();mpRenderPlayerRoster();}else{let r=mpRemotePlayers.get(packet.id);if(r&&r.data){r.data.tagText=packet.tagText||'';r.data.tagColor=packet.tagColor||'#ffd54a';mpSetRemoteName(r,r.data.name,r.data.tagText,r.data.tagColor,r.data.nickColor,r.data.nickRainbow);mpRenderPlayerRoster();}}}
   else if(packet.type==='coin-update'){mpApplyServerCoins(packet.coins);}
   else if(packet.type==='kicked'){mpStatus('Тебя отключил администратор. Можно подключиться снова.');mpClean();}
   else if(packet.type==='peer-data'&&packet.id&&packet.id!==mpLocalId){
@@ -3124,7 +3129,7 @@ function mpHandlePacket(packet){
 }
 function mpStoreRemoteState(r,data){
   const t=performance.now();
-  r.data=data;mpSetRemoteName(r,data.name,data.tagText,data.tagColor);mpRenderPlayerRoster();
+  r.data=data;mpSetRemoteName(r,data.name,data.tagText,data.tagColor,data.nickColor,data.nickRainbow);mpRenderPlayerRoster();
   if(!Array.isArray(r.snapshots))r.snapshots=[];
   r.snapshots.push({t,data});
   // Достаточно нескольких снимков для интерполяции с небольшим сетевым запасом.
@@ -3159,7 +3164,7 @@ function mpConnectServer(){
   mpConn.addEventListener('open',()=>{
     mpRenderPlayerRoster();
     mpStatus('Соединение установлено. Загружаем игроков…');
-    mpSend({type:'hello',clientId:mpClientId,nick:(store.get('pk_mp_nick','').trim()||'Player'),tagText:store.get('pk_mp_tag',''),tagColor:store.get('pk_mp_tag_color','#ffd54a'),initialCoins:coins});
+    mpSend({type:'hello',clientId:mpClientId,nick:(store.get('pk_mp_nick','').trim()||'Player'),tagText:store.get('pk_mp_tag',''),tagColor:store.get('pk_mp_tag_color','#ffd54a'),nickColor:mpNickColor(),nickRainbow:mpNickRainbow(),initialCoins:coins});
     // Send the current appearance immediately on connection, without requiring the player to reselect the skin.
     mpRefreshLocalParts();
     const sources=mpGetLocalParts();
@@ -3173,9 +3178,13 @@ function mpConnectServer(){
 $('mpReconnect').addEventListener('click',mpConnectServer);
 $('mpBack').addEventListener('click',()=>showScreen('main'));
 $('mmMulti').addEventListener('click',()=>{showScreen('multiplayer');paused=true;mpConnectServer();});
-$('mmProfile').addEventListener('click',()=>{const n=store.get('pk_mp_nick','Player').trim()||'Player';$('profileNick').value=n;if(mpIsAdmin()){$('profileTag').value=store.get('pk_mp_tag','');$('profileTagColor').value=store.get('pk_mp_tag_color','#ffd54a');}$('profileMsg').textContent='';mpRefreshProfileId();$('profileTagAdminOnly').style.display=mpIsAdmin()?'block':'none';$('adminPanel').style.display=mpIsAdmin()?'block':'none';showScreen('profile');paused=true;if(!mpLocalId)mpConnectServer();else mpRefreshAdminList();});
+$('mmProfile').addEventListener('click',()=>{const n=store.get('pk_mp_nick','Player').trim()||'Player';$('profileNick').value=n;if(mpIsAdmin()){$('profileTag').value=store.get('pk_mp_tag','');$('profileTagColor').value=store.get('pk_mp_tag_color','#ffd54a');}$('profileMsg').textContent='';mpRefreshNickStyle();mpRefreshProfileId();$('profileTagAdminOnly').style.display=mpIsAdmin()?'block':'none';$('adminPanel').style.display=mpIsAdmin()?'block':'none';showScreen('profile');paused=true;if(!mpLocalId)mpConnectServer();else mpRefreshAdminList();});
 $('profileSave').addEventListener('click',()=>{const nick=$('profileNick').value.trim().replace(/[<>\\]/g,'').slice(0,20)||'Player';store.set('pk_mp_nick',nick);let tag=store.get('pk_mp_tag',''),color=store.get('pk_mp_tag_color','#ffd54a');if(mpIsAdmin()){tag=$('profileTag').value.trim().replace(/[<>\\]/g,'').slice(0,28);color=$('profileTagColor').value;store.set('pk_mp_tag',tag);store.set('pk_mp_tag_color',color);}$('profileNick').value=nick;if(mpIsAdmin())$('profileTag').value=tag;$('profileMsg').textContent='Профиль сохранён!';mpSend({type:'profile',nick:nick||'Player',tagText:tag,tagColor:color});mpUpdateLocalNameTag();mpRenderPlayerRoster();});
 $('profileCopyId').addEventListener('click',async()=>{const msg=$('profileCopyMsg');try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(mpClientId);}else{const t=document.createElement('textarea');t.value=mpClientId;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();const ok=document.execCommand('copy');t.remove();if(!ok)throw new Error('copy failed');}msg.textContent='ID скопирован!';}catch(_){msg.textContent='Не удалось скопировать. Выдели ID и скопируй вручную.';}});
+$('buyNickColor').addEventListener('click',()=>{const msg=$('nickStyleMsg');if(coins<100){msg.textContent='Недостаточно монет!';return;}coins-=100;store.set('pk_coins',coins);store.set('pk_nick_color_owned',true);store.set('pk_nick_color','#ffffff');updateMainInfo();mpRefreshNickStyle();mpUpdateLocalNameTag();mpSend({type:'profile',nick:store.get('pk_mp_nick','Player'),nickColor:mpNickColor(),nickRainbow:mpNickRainbow()});msg.textContent='Цвет никнейма открыт!';});
+$('nickColorPicker').addEventListener('input',e=>{if(!store.get('pk_nick_color_owned',false))return;store.set('pk_nick_color',e.target.value);mpUpdateLocalNameTag();mpSend({type:'profile',nick:store.get('pk_mp_nick','Player'),nickColor:mpNickColor(),nickRainbow:mpNickRainbow()});mpRosterSignature='';mpRenderPlayerRoster();});
+$('buyNickRainbow').addEventListener('click',()=>{const msg=$('nickStyleMsg');if(!store.get('pk_nick_color_owned',false)){msg.textContent='Сначала открой смену цвета.';return;}if(coins<500){msg.textContent='Недостаточно монет!';return;}coins-=500;store.set('pk_coins',coins);store.set('pk_nick_rainbow_owned',true);store.set('pk_nick_rainbow',true);updateMainInfo();mpRefreshNickStyle();mpUpdateLocalNameTag();mpSend({type:'profile',nick:store.get('pk_mp_nick','Player'),nickColor:mpNickColor(),nickRainbow:true});msg.textContent='Радужный эффект открыт!';});
+$('nickRainbowToggle').addEventListener('change',e=>{if(!store.get('pk_nick_rainbow_owned',false))return;store.set('pk_nick_rainbow',!!e.target.checked);mpUpdateLocalNameTag();mpSend({type:'profile',nick:store.get('pk_mp_nick','Player'),nickColor:mpNickColor(),nickRainbow:mpNickRainbow()});});
 $('profileBack').addEventListener('click',goMain);
 $('adminApplyCoins').addEventListener('click',()=>{if(!mpIsAdmin()||!mpAdminSelectedId){$('adminMsg').textContent='Сначала выбери игрока.';return;}const amount=Number($('adminCoinAmount').value);if(!Number.isFinite(amount)||!Number.isInteger(amount)||amount===0){$('adminMsg').textContent='Введи целое число, не равное нулю.';return;}mpSend({type:'admin-coins',targetId:mpAdminSelectedId,amount});});
 $('adminKick').addEventListener('click',()=>{if(!mpIsAdmin()||!mpAdminSelectedId){$('adminMsg').textContent='Сначала выбери игрока.';return;}if(mpAdminSelectedId===mpClientId){$('adminMsg').textContent='Нельзя кикнуть самого себя.';return;}mpSend({type:'admin-kick',targetId:mpAdminSelectedId});});
@@ -3250,7 +3259,7 @@ function mpUpdate(dt,now){
     mpRefreshLocalParts();scene.updateMatrixWorld(true);const parts=[];
     for(const src of mpLocalParts){src.updateMatrixWorld(true);let vis=true;for(let a=src;a&&a!==scene;a=a.parent)if(!a.visible){vis=false;break;}const mat=Array.isArray(src.material)?src.material[0]:src.material;const part={m:src.matrixWorld.toArray(),v:vis,c:mat&&mat.color?mat.color.getHex():null,o:mat&&Number.isFinite(mat.opacity)?mat.opacity:1};if(cloth&&src===cloth.mesh&&cloth.pos){part.clothPos=Array.from(cloth.pos);part.clothCol=Array.from(cloth.col);}parts.push(part);}
     const bodies=mode===PHYS?BD.map(b=>({x:b.x,y:b.y,a:b.a,vx:b.vx,vy:b.vy,w:b.w,m:b.m,I:b.I,circ:b.circ.map(c=>[c[0],c[1],c[2]])})):null;
-    try{mpConn.send(JSON.stringify({type:'state',x,y,face,phys:mode===PHYS,angle:mode===PHYS?BD[0].a:0,vx:mode===PHYS?BD[0].vx:C.vx,vy:mode===PHYS?BD[0].vy:C.vy,by:C.by,bodyH:BODY_H,bodyW:HW,bodies,parts,name:(store.get('pk_mp_nick','').trim()||'Player'),tagText:store.get('pk_mp_tag',''),tagColor:store.get('pk_mp_tag_color','#ffd54a')}));}catch(_){}
+    try{mpConn.send(JSON.stringify({type:'state',x,y,face,phys:mode===PHYS,angle:mode===PHYS?BD[0].a:0,vx:mode===PHYS?BD[0].vx:C.vx,vy:mode===PHYS?BD[0].vy:C.vy,by:C.by,bodyH:BODY_H,bodyW:HW,bodies,parts,name:(store.get('pk_mp_nick','').trim()||'Player'),tagText:store.get('pk_mp_tag',''),tagColor:store.get('pk_mp_tag_color','#ffd54a'),nickColor:mpNickColor(),nickRainbow:mpNickRainbow()}));}catch(_){}
   }
   for(const [id,r] of mpRemotePlayers){const d=r.data;if(!d)continue;
     if(r.nameSprite){r.nameSprite.position.set((Number.isFinite(d.x)?d.x:0),(Number.isFinite(d.y)?d.y:0)+1.42,0);r.nameSprite.visible=true;}
@@ -3555,53 +3564,385 @@ if ('serviceWorker' in navigator) {
   const LANG_KEY='pk_language';
   let lang=localStorage.getItem(LANG_KEY)||'ru';
   const originals=new WeakMap();
-
   const T={
-    'Паркур':'Parkour','Высота:':'Height:','сальто:':'flips:','Идти':'Walk','Прыжок':'Jump','Сброс':'Reset','Поворот':'Turn','Сальто':'Flip','Прямое тело':'Straight body','Свернуться':'Tuck','Гравитация: Земля':'Gravity: Earth','Поверните телефон горизонтально':'Rotate your phone horizontally',
-    'Играть':'Play','Создать':'Create','Арена':'Arena','Магазин':'Shop','Скины':'Skins','Настройки':'Settings','Коды':'Codes','Монеты:':'Coins:','СЕТЬ':'MULTIPLAYER','ПРОФИЛЬ':'PROFILE','ПАРКУР':'PARKOUR','Рекорд:':'Record:',
-    'Введи код, чтобы открыть секретный скин.':'Enter a code to unlock a secret skin.','ПРОФИЛЬ':'PROFILE','Твой ID клиента:':'Your client ID:','ОБЩИЙ СЕРВЕР':'PUBLIC SERVER','Игра автоматически подключается к одному серверу. Все игроки находятся в общей комнате — коды не нужны.':'The game automatically connects to one server. All players are in the same room — no codes are needed.',
-    'НАСТРОЙКИ':'SETTINGS','ОСНОВНЫЕ':'GENERAL','КАМЕРА':'CAMERA','Расчленение: ВКЛ':'Dismemberment: ON','Гравитация: Земля':'Gravity: Earth','Спавн: Земля':'Spawn: Ground','Карта: Арена':'Map: Arena','Экранные кнопки: ВКЛ':'Touch controls: ON','Эффекты ранений: ВКЛ':'Injury effects: ON','Полно-экранный режим: ВЫКЛ':'Fullscreen: OFF','Управление':'Controls','Реплей':'Replay','Как играть':'How to play','Начать заново':'Restart','Главное меню':'Main menu','Назад':'Back','Сбросить камеру':'Reset camera',
-    'РЕЖИМ КАМЕРЫ':'CAMERA MODE','Свободная':'Free','Статичная':'Static','Свободная — плавно следует за игроком. Статичная — жёстко привязана к игроку.':'Free — smoothly follows the player. Static — locked to the player.','К ЧАСТИ ТЕЛА':'ATTACHED TO BODY PART','Голова':'Head','Шея':'Neck','Торс':'Torso','Таз':'Pelvis','Камера будет жёстко следовать за выбранной частью тела. Положение регулируется ползунками X/Y/Z.':'The camera will lock to the selected body part. Position is adjusted with the X/Y/Z sliders.','ТИП КАМЕРЫ':'CAMERA TYPE','НАСТРОЙКИ 3D':'3D SETTINGS','НАСТРОЙКИ 2D':'2D SETTINGS','Масштаб:':'Zoom:','РЕПЛЕЙ':'REPLAY','Запись начнётся автоматически во время игры.':'Recording starts automatically during gameplay.','▶ Смотреть':'▶ Watch','■ Стоп':'■ Stop','УПРАВЛЕНИЕ':'CONTROLS','Клавиатура (ПК)':'Keyboard (PC)','Экранные кнопки':'Touch buttons','По умолчанию':'Default','КАК ИГРАТЬ':'HOW TO PLAY',
-    'Магазин':'Shop','Шляпы':'Hats','Плащи':'Capes','Штаны':'Pants','Кофты':'Tops','Положение шляпы':'Hat position','(небольшая настройка)':'(small adjustment)','Влево / вправо':'Left / right','Вверх / вниз':'Up / down','Сбросить положение':'Reset position','Повернуть':'Rotate','СКИНЫ':'SKINS','Платформа':'Platform','Турник':'Bar','Удалить':'Delete','Старт':'Start','Рука':'Hand','Очистить':'Clear','▶ Играть':'▶ Play',
-    'Без шляпы':'No hat','Кепка':'Cap','Каска':'Hard hat','Ковбойская шляпа':'Cowboy hat','Цилиндр':'Top hat','Колпак мага':'Wizard hat','Корона':'Crown','Без плаща':'No cape','Красный плащ':'Red cape','Зелёный плащ':'Green cape','Синий плащ':'Blue cape','Чёрный плащ':'Black cape','Плащ героя':'Hero cape','Королевская мантия':'Royal mantle','Без штанов':'No pants','Джинсы-баги':'Baggy jeans','Карго':'Cargo pants','Спортивки':'Track pants','Кожаные':'Leather pants','Неон-джоггеры':'Neon joggers','Золотые баги':'Golden baggy pants','Без кофты':'No top','Худи серое':'Gray hoodie','Худи чёрное':'Black hoodie','Бомбер':'Bomber','Джинсовка':'Denim jacket','Кожанка':'Leather jacket','Пуховик':'Puffer jacket','Золотая куртка':'Golden jacket','Классика':'Classic','Красная майка':'Red shirt','Зелёный':'Green','Ниндзя':'Ninja','Манекен':'Dummy','Золотой':'Golden','Bacon — мой скин':'Bacon — my skin','RGB':'RGB',
-    'Купить ·':'Buy ·','Надеть':'Equip','Снять':'Unequip','Цвет':'Color','Радуга':'Rainbow','Перекрасить · 100':'Recolor · 100','Монеты':'Coins','САЛЬТО':'FLIP','ПРЫЖОК С':'JUMP FROM','НОКАУТ':'KNOCKOUT','Сотрясение':'Concussion','Перелом ноги':'Leg fracture','Перелом руки':'Arm fracture','Ушиб рёбер':'Rib bruise','Ушиб колена':'Knee bruise','Растяжение голеностопа':'Ankle sprain','Ушиб плеча':'Shoulder bruise','Растяжение запястья':'Wrist sprain','Ушиб':'Bruise'
-  };
+    "Паркур": "Parkour",
+    "Высота:": "Height:",
+    "сальто:": "flips:",
+    "Идти": "Walk",
+    "Прыжок": "Jump",
+    "Сброс": "Reset",
+    "Поворот": "Turn",
+    "Сальто": "Flip",
+    "Прямое тело": "Straight body",
+    "Свернуться": "Tuck",
+    "Гравитация: Земля": "Gravity: Earth",
+    "Поверните телефон горизонтально": "Rotate your phone horizontally",
+    "Играть": "Play",
+    "Создать": "Create",
+    "Арена": "Arena",
+    "Магазин": "Shop",
+    "Скины": "Skins",
+    "Настройки": "Settings",
+    "Коды": "Codes",
+    "Монеты:": "Coins:",
+    "СЕТЬ": "MULTIPLAYER",
+    "ПРОФИЛЬ": "PROFILE",
+    "ПАРКУР": "PARKOUR",
+    "Рекорд:": "Record:",
+    "Введи код, чтобы открыть секретный скин.": "Enter a code to unlock a secret skin.",
+    "Твой ID клиента:": "Your client ID:",
+    "ОБЩИЙ СЕРВЕР": "PUBLIC SERVER",
+    "Игра автоматически подключается к одному серверу. Все игроки находятся в общей комнате — коды не нужны.": "The game automatically connects to one server. All players are in the same room — no codes are needed.",
+    "НАСТРОЙКИ": "SETTINGS",
+    "ОСНОВНЫЕ": "GENERAL",
+    "КАМЕРА": "CAMERA",
+    "Расчленение: ВКЛ": "Dismemberment: ON",
+    "Спавн: Земля": "Spawn: Ground",
+    "Карта: Арена": "Map: Arena",
+    "Экранные кнопки: ВКЛ": "Touch controls: ON",
+    "Эффекты ранений: ВКЛ": "Injury effects: ON",
+    "Полно-экранный режим: ВЫКЛ": "Fullscreen: OFF",
+    "Управление": "Controls",
+    "Реплей": "Replay",
+    "Как играть": "How to play",
+    "Начать заново": "Restart",
+    "Главное меню": "Main menu",
+    "Назад": "Back",
+    "Сбросить камеру": "Reset camera",
+    "РЕЖИМ КАМЕРЫ": "CAMERA MODE",
+    "Свободная": "Free",
+    "Статичная": "Static",
+    "Свободная — плавно следует за игроком. Статичная — жёстко привязана к игроку.": "Free — smoothly follows the player. Static — locked to the player.",
+    "К ЧАСТИ ТЕЛА": "ATTACHED TO BODY PART",
+    "Голова": "Head",
+    "Шея": "Neck",
+    "Торс": "Torso",
+    "Таз": "Pelvis",
+    "Камера будет жёстко следовать за выбранной частью тела. Положение регулируется ползунками X/Y/Z.": "The camera will stay locked to the selected body part. Adjust its position with the X/Y/Z sliders.",
+    "ТИП КАМЕРЫ": "CAMERA TYPE",
+    "НАСТРОЙКИ 3D": "3D SETTINGS",
+    "НАСТРОЙКИ 2D": "2D SETTINGS",
+    "Масштаб:": "Zoom:",
+    "РЕПЛЕЙ": "REPLAY",
+    "Запись начнётся автоматически во время игры.": "Recording starts automatically during gameplay.",
+    "▶ Смотреть": "▶ Watch",
+    "■ Стоп": "■ Stop",
+    "УПРАВЛЕНИЕ": "CONTROLS",
+    "Клавиатура (ПК)": "Keyboard (PC)",
+    "Экранные кнопки": "Touch controls",
+    "По умолчанию": "Default",
+    "КАК ИГРАТЬ": "HOW TO PLAY",
+    "Шляпы": "Hats",
+    "Плащи": "Capes",
+    "Штаны": "Pants",
+    "Кофты": "Tops",
+    "Положение шляпы": "Hat position",
+    "(небольшая настройка)": "(small adjustment)",
+    "Влево / вправо": "Left / right",
+    "Вверх / вниз": "Up / down",
+    "Сбросить положение": "Reset position",
+    "Повернуть": "Rotate",
+    "СКИНЫ": "SKINS",
+    "Платформа": "Platform",
+    "Турник": "Bar",
+    "Удалить": "Delete",
+    "Старт": "Start",
+    "Рука": "Hand",
+    "Очистить": "Clear",
+    "▶ Играть": "▶ Play",
+    "Без шляпы": "No hat",
+    "Кепка": "Cap",
+    "Каска": "Hard hat",
+    "Ковбойская шляпа": "Cowboy hat",
+    "Цилиндр": "Top hat",
+    "Колпак мага": "Wizard hat",
+    "Корона": "Crown",
+    "Без плаща": "No cape",
+    "Красный плащ": "Red cape",
+    "Зелёный плащ": "Green cape",
+    "Синий плащ": "Blue cape",
+    "Чёрный плащ": "Black cape",
+    "Плащ героя": "Hero cape",
+    "Королевская мантия": "Royal mantle",
+    "Без штанов": "No pants",
+    "Джинсы-баги": "Baggy jeans",
+    "Карго": "Cargo pants",
+    "Спортивки": "Track pants",
+    "Кожаные": "Leather pants",
+    "Неон-джоггеры": "Neon joggers",
+    "Золотые баги": "Golden baggy pants",
+    "Без кофты": "No top",
+    "Худи серое": "Gray hoodie",
+    "Худи чёрное": "Black hoodie",
+    "Бомбер": "Bomber jacket",
+    "Джинсовка": "Denim jacket",
+    "Кожанка": "Leather jacket",
+    "Пуховик": "Puffer jacket",
+    "Золотая куртка": "Golden jacket",
+    "Классика": "Classic",
+    "Красная майка": "Red shirt",
+    "Зелёный": "Green",
+    "Ниндзя": "Ninja",
+    "Манекен": "Dummy",
+    "Золотой": "Golden",
+    "Bacon — мой скин": "Bacon — my skin",
+    "RGB": "RGB",
+    "Купить ·": "Buy ·",
+    "Надеть": "Equip",
+    "Снять": "Unequip",
+    "Цвет": "Color",
+    "Радуга": "Rainbow",
+    "Перекрасить · 100": "Recolor · 100",
+    "Монеты": "Coins",
+    "САЛЬТО": "FLIP",
+    "ПРЫЖОК С": "JUMP FROM",
+    "НОКАУТ": "KNOCKOUT",
+    "Сотрясение": "Concussion",
+    "Перелом ноги": "Leg fracture",
+    "Перелом руки": "Arm fracture",
+    "Ушиб рёбер": "Rib bruise",
+    "Ушиб колена": "Knee bruise",
+    "Растяжение голеностопа": "Ankle sprain",
+    "Ушиб плеча": "Shoulder bruise",
+    "Растяжение запястья": "Wrist sprain",
+    "Ушиб": "Bruise",
+    "ОБНОВА": "UPDATE",
+    "Игра обновляется…": "Game is updating…",
+    "главное меню": "main menu",
+    "Введите код": "Enter code",
+    "Введите ник": "Enter nickname",
+    "Цвет никнейма": "Nickname color",
+    "Открыть смену цвета · 100 монет": "Unlock nickname color · 100 coins",
+    "Выбрать цвет": "Choose color",
+    "Купить переливание радугой · 500 монет": "Buy rainbow effect · 500 coins",
+    "Включить радугу": "Enable rainbow",
+    "Текст над ником": "Text above nickname",
+    "Например: 100 или -50": "For example: 100 or -50",
+    "Награда за сальто: +": "Flip reward: +",
+    " монет!": " coins!",
+    "Активировать": "Redeem",
+    "Загрузка ID…": "Loading ID…",
+    "Скопировать ID": "Copy ID",
+    "Ник над головой (виден игрокам в мультиплеере):": "Nickname above your head (visible to other players):",
+    "Неймтаг над ником (только администратор):": "Nametag above your nickname (admin only):",
+    "Цвет неймтага": "Nametag color",
+    "Сохранить профиль": "Save profile",
+    "АДМИН-ПАНЕЛЬ": "ADMIN PANEL",
+    "Игроки онлайн · ник и ID. Для действий подключись к общему серверу.": "Players online · nickname and ID. Connect to the public server to perform actions.",
+    "Сумма монет (+ выдать / − забрать)": "Coin amount (+ give / − take)",
+    "Применить к выбранному игроку": "Apply to selected player",
+    "Кикнуть выбранного игрока": "Kick selected player",
+    "Неймтаг выбранного игрока": "Selected player's nametag",
+    "Установить неймтаг": "Set nametag",
+    "⟳ ОБНОВА — перезагрузить всех": "⟳ UPDATE — reload everyone",
+    "Покажет всем игрокам экран «Обнова» и перезагрузит игру.": "Shows the “Update” screen to all players and reloads the game.",
+    "Общая комната": "Shared room",
+    "Подключаемся к серверу…": "Connecting to server…",
+    "Переподключиться": "Reconnect",
+    "Игроки": "Players",
+    "Нет игроков онлайн.": "No players online.",
+    "Игрок": "Player",
+    "Выбран: ": "Selected: ",
+    "Баланс обновлён: ": "Balance updated: ",
+    "Подключено к общему серверу. Игроков: ": "Connected to the public server. Players: ",
+    "Игрок отключился. На сервере ещё ": "A player disconnected. There are still ",
+    " других игроков.": " other players.",
+    "Готово": "Done",
+    "Тебя отключил администратор. Можно подключиться снова.": "An administrator disconnected you. You can reconnect.",
+    "Подключение к общему серверу…": "Connecting to the public server…",
+    "Этот браузер не поддерживает WebSocket.": "This browser does not support WebSocket.",
+    "Подключаемся к общему серверу…": "Connecting to the public server…",
+    "Не удалось создать подключение.": "Could not create a connection.",
+    "Соединение установлено. Загружаем игроков…": "Connection established. Loading players…",
+    "Нет соединения с сервером. Пробуем подключиться снова…": "No connection to the server. Trying to reconnect…",
+    "Ошибка соединения. Сервер ещё запускается или недоступен.": "Connection error. The server may still be starting or is unavailable.",
+    "Профиль сохранён!": "Profile saved!",
+    "ID скопирован!": "ID copied!",
+    "Не удалось скопировать. Выдели ID и скопируй вручную.": "Could not copy. Select the ID and copy it manually.",
+    "Сначала выбери игрока.": "Select a player first.",
+    "Введи целое число, не равное нулю.": "Enter a non-zero integer.",
+    "Нельзя кикнуть самого себя.": "You can't kick yourself.",
+    "Нет доступа.": "Access denied.",
+    "Сначала подключись к общему серверу.": "Connect to the public server first.",
+    "Показать всем игрокам экран «Обнова» и перезагрузить игру?": "Show the “Update” screen to all players and reload the game?",
+    "Команда обновления отправлена серверу.": "Update command sent to the server.",
+    " — бежать. ": " — run. ",
+    " — развернуться. ": " — turn around. ",
+    " — прыгнуть. На ПК: ": " — jump. On PC: ",
+    " или стрелки — бежать влево и вправо, ": " or arrow keys — move left and right, ",
+    "Пробел": "Space",
+    " — прыжок. Все клавиши и кнопки можно переназначить в «Управлении».": " — jump. All keys and buttons can be remapped in Controls.",
+    "Позы работают в любом состоянии, даже стоя: ": "Poses work in any state, even while standing: ",
+    " — группировка, ": " — tuck, ",
+    " — руки вверх, ": " — arms up, ",
+    " — ноги вперёд. Зажми ": " — legs forward. Hold ",
+    " и ": " and ",
+    " вместе (или нажми ": " together (or press ",
+    " сразу после прыжка) — сальто. Полное сальто с приземлением на ноги даёт монеты.": " right after jumping) to perform a flip. A full flip followed by a feet-first landing earns coins.",
+    "Турник:": "Horizontal bar:",
+    " коснись перекладины руками в прыжке — и повиснешь. Качайся: нажимай ": " touch the bar with your hands while jumping to grab it. Swing by pressing ",
+    ", когда летишь вперёд, и отпускай на обратном ходу. ": ", while moving forward, and release on the way back. ",
+    " или ": " or ",
+    " — отпустить.": " — release.",
+    "Приземлился криво — тело обмякает (рэгдолл), потом встанет само. Очень сильный удар может оторвать конечность (можно выключить в настройках).": "A bad landing makes the body go limp (ragdoll), then it gets back up on its own. A very hard impact can detach a limb (this can be disabled in Settings).",
+    "Карты: «Арена», «Город» (балконы, водосточные трубы, пожарные лестницы и штанги между домами) и «Моя карта». Смена карты — в главном меню или в настройках. С перекладины можно подпрыгнуть вверх (Прыжок) и схватиться за следующую — так лезут по трубе.": "Maps: “Arena”, “City” (balconies, drainpipes, fire escapes, and bars between buildings), and “My Map”. Change maps in the main menu or Settings. You can jump up from a bar (Jump) and grab the next one to climb along a pipe.",
+    "Карта «Озеро»: прыгай с горы или с вышки в воду. В воде: ": "“Lake” map: jump from the mountain or tower into the water. In the water: ",
+    " — плыть, ": " — swim, ",
+    " — вверх, ": " — up, ",
+    " — нырять. За высокие прыжки и сальто в воду — монеты. В «Магазине» можно примерить и купить шляпы, плащи и штаны (плащ — настоящая ткань: развевается, цепляется за землю, плавает в воде).": " — dive. Earn coins for high jumps and flips into the water. In the Shop, you can try on and buy hats, capes, and pants (the cape is real cloth: it waves, catches on the ground, and floats in water).",
+    "Травмы зависят от силы удара. Слабый удар — синяк или ссадина, удар посильнее — рваная рана с кровью, сильный — перелом (нога хуже ходит, с повреждённой рукой нельзя схватиться за перекладину). Отрыв конечности бывает только от очень сильных или повторных ударов. Полоса сверху — здоровье: оно медленно восстанавливается, а при нуле — нокаут и возрождение. «Жёсткие» травмы — всё то же, но порог ниже и больше крови, кишок и осколков.": "Injuries depend on impact strength. A light impact causes a bruise or scrape; a stronger one causes a bleeding cut; a severe impact can cause a fracture (a damaged leg affects movement, and an injured arm cannot grab a bar). A limb can detach only after very strong or repeated impacts. The bar at the top shows health: it slowly regenerates, and reaching zero causes a knockout and respawn. “Severe” injuries work the same way, but the threshold is lower and effects are stronger.",
+    "Платформа: потяни пальцем/мышью, чтобы нарисовать прямоугольник": "Platform: drag with your finger or mouse to draw a rectangle",
+    "Турник: коснись места, где поставить перекладину (высота от 1,5 м)": "Bar: tap where you want to place it (height above 1.5 m)",
+    "Удалить: коснись платформы или турника": "Delete: tap a platform or bar",
+    "Старт: коснись места появления игрока": "Start: tap where the player should spawn",
+    "Рука: двигай карту (колёсико мыши — масштаб)": "Hand: move the map (mouse wheel to zoom)",
+    "Точно?": "Are you sure?",
+    "СТАРТ": "START",
+    "Выбрано": "Selected",
+    "Выбрать": "Select",
+    "Влево": "Left",
+    "Вправо": "Right",
+    "Слева сверху": "Top left",
+    "Слева в центре": "Center left",
+    "Слева снизу": "Bottom left",
+    "Внизу у меню": "Bottom near menu",
+    "Значок меню": "Menu icon",
+    "Справа сверху": "Top right",
+    "Справа в центре": "Center right",
+    "Справа снизу": "Bottom right",
+    "Нажмите клавишу…": "Press a key…",
+    "Записано: ": "Recorded: ",
+    " сек.": " sec.",
+    "Гравитация: ": "Gravity: ",
+    "Травмы: ": "Injuries: ",
+    "ВЫКЛ": "OFF",
+    "ВКЛ": "ON",
+    "РЕАЛИСТИЧНЫЕ": "REALISTIC",
+    "ЖЁСТКИЕ": "SEVERE",
+    "Земля": "Earth",
+    "Марс": "Mars",
+    "Луна": "Moon",
+    "Город": "City",
+    "Озеро": "Lake",
+    "Баня (с дымком)": "Bathhouse (steamy)",
+    "Моя карта": "My Map",
+    "Код принят! Секретный жёлтый скин открыт и надет.": "Code accepted! The secret yellow skin has been unlocked and equipped.",
+    "Этот промокод уже использован.": "This promo code has already been used.",
+    "Промокод принят! Твой скин Bacon открыт и надет.": "Promo code accepted! Your Bacon skin has been unlocked and equipped.",
+    "Промокод принят! Начислено 999 монет.": "Promo code accepted! 999 coins have been added.",
+    "Неверный код.": "Invalid code.",
+    "Пока нет записи. Вернись в игру и немного попаркурь.": "No replay yet. Return to the game and play for a little while.",
+    "Левый турник": "Left bar",
+    "Правый турник": "Right bar",
+    "Левый шест": "Left pole",
+    "Правый шест": "Right pole",
+    "Верх колонны": "Top of the column",
+    "Случайно": "Random",
+    "Улица": "Street",
+    "Штанга 1": "Barbell 1",
+    "Штанга 2": "Barbell 2",
+    "Штанга 3": "Barbell 3",
+    "Штанга 4": "Barbell 4",
+    "Крыша": "Roof",
+    "Вершина горы": "Mountain top",
+    "Уступ 14 м": "14 m ledge",
+    "Уступ 7 м": "7 m ledge",
+    "Вышка 15 м": "15 m tower",
+    "Вышка 10 м": "10 m tower",
+    "Остров": "Island",
+    "У входа": "Entrance",
+    "Ступенька 1": "Step 1",
+    "Ступенька 2": "Step 2",
+    "Ступенька 3": "Step 3",
+    "Ступенька 4": "Step 4",
+    "Нужно 100 монет": "You need 100 coins",
+    "Перекраска открыта!": "Recoloring unlocked!",
+    "Выбери игрока": "Select a player",
+    "КОДЫ": "CODES",
+    "ИГРОКИ": "PLAYERS",
+    "МАГАЗИН": "SHOP",
+    "скины": "skins",
+    "редактор карт": "map editor",
+    "настройки": "settings",
+    "реплей": "replay",
+    "управление": "controls",
+    "как играть": "how to play",
+    "Выбрать цвет": "Choose color",
+    "Спавн: ": "Spawn: ",
+    "Карта: ": "Map: ",
+    "Эффекты ранений: ": "Injury effects: ",
+    "Полно-экранный режим: ": "Fullscreen: ",
+    " м": " m",
+    " монет": " coins",
+    " м  ·  твои сальто: ": " m · your flips: ",
+    "— бежать.": "— run.",
+    "— развернуться.": "— turn around.",
+    "— прыгнуть. На ПК:": "— jump. On PC:",
+    "или стрелки — бежать влево и вправо,": "or arrow keys — move left and right,",
+    "— прыжок. Все клавиши и кнопки можно переназначить в «Управлении».": "— jump. All keys and buttons can be remapped in Controls.",
+    "Позы работают в любом состоянии, даже стоя:": "Poses work in any state, even while standing:",
+    "— группировка,": "— tuck,",
+    "— руки вверх,": "— arms up,",
+    "— ноги вперёд. Зажми": "— legs forward. Hold",
+    "вместе (или нажми": "together (or press",
+    "сразу после прыжка) — сальто. Полное сальто с приземлением на ноги даёт монеты.": "right after jumping) to perform a flip. A full flip followed by a feet-first landing earns coins.",
+    "коснись перекладины руками в прыжке — и повиснешь. Качайся: нажимай": "touch the bar with your hands while jumping to grab it. Swing by pressing",
+    ", когда летишь вперёд, и отпускай на обратном ходу.": ", while moving forward, and release on the way back.",
+    "Карта «Озеро»: прыгай с горы или с вышки в воду:": "“Lake” map: jump from the mountain or tower into the water:",
+    "— плыть,": "— swim,",
+    "— вверх,": "— up,",
+    "— нырять. За высокие прыжки и сальто в воду — монеты. В «Магазине» можно примерить и купить шляпы, плащи и штаны (плащ — настоящая ткань: развевается, цепляется за землю, плавает в воде).": "— dive. Earn coins for high jumps and flips into the water. In the Shop, you can try on and buy hats, capes, and pants (the cape is real cloth: it waves, catches on the ground, and floats in water).",
+    "V 3.0 · Рекорд: ": "V 3.0 · Record: ",
+    "ПЕРЕКРАСКА": "RECOLOR",
+    " магазин: примерочная со шляпами ": " shop: hat fitting room "
+};
 
+  const entries=Object.entries(T).sort((a,b)=>b[0].length-a[0].length);
   function translateString(str){
-    if(!str) return str;
-    let out=str;
-    for(const [ru,en] of Object.entries(T)) out=out.split(ru).join(lang==='en'?en:ru);
+    if(!str)return str;
+    let out=String(str);
+    for(const [ru,en] of entries)out=out.split(ru).join(lang==='en'?en:ru);
     if(lang==='en'){
       out=out.replace(/Высота:\s*(\d+)\s*м\s*·\s*сальто:\s*(\d+)/i,'Height: $1 m · flips: $2');
       out=out.replace(/Монеты:\s*(\d+)/i,'Coins: $1');
       out=out.replace(/Рекорд:\s*(\d+)\s*м/i,'Record: $1 m');
       out=out.replace(/ПРЫЖОК С\s*(\d+)\s*м/i,'JUMP FROM $1 m');
       out=out.replace(/САЛЬТО(\s*×\d+)?\s*\+?(\d*)\s*монет/i,(m,n,g)=>'FLIP'+(n||'')+(g?'  +'+g+' coins':''));
+      out=out.replace(/Высота:\s*(\d+)\s*м\s*·\s*твои сальто:\s*(\d+)/i,'Height: $1 m · your flips: $2');
     }
     return out;
   }
 
   function translateNode(node){
     if(node.nodeType===Node.TEXT_NODE){
-      if(!originals.has(node)) originals.set(node,node.nodeValue);
-      node.nodeValue=translateString(originals.get(node));
+      const raw=node.nodeValue;
+      let rec=originals.get(node);
+      if(!rec){rec={source:raw,last:raw};originals.set(node,rec);}
+      else if(raw!==rec.last){rec.source=raw;}
+      const translated=translateString(rec.source);
+      rec.last=translated;
+      if(node.nodeValue!==translated)node.nodeValue=translated;
       return;
     }
-    if(node.nodeType!==Node.ELEMENT_NODE) return;
-    const attrs=['placeholder','title','aria-label'];
+    if(node.nodeType!==Node.ELEMENT_NODE)return;
+    const attrs=['placeholder','title','aria-label','alt','content'];
+    if(node.tagName==='INPUT'&&/^(button|submit|reset)$/i.test(node.type||''))attrs.push('value');
     for(const a of attrs){
-      if(node.hasAttribute(a)){
-        const key=node.tagName+'|'+a;
-        let rec=node._i18nAttrs||(node._i18nAttrs={});
-        if(rec[a]===undefined)rec[a]=node.getAttribute(a);
-        node.setAttribute(a,translateString(rec[a]));
-      }
+      if(!node.hasAttribute(a))continue;
+      let rec=node._i18nAttrs||(node._i18nAttrs={});
+      const raw=node.getAttribute(a);
+      if(!rec[a])rec[a]={source:raw,last:raw};
+      else if(raw!==rec[a].last)rec[a].source=raw;
+      const translated=translateString(rec[a].source);
+      rec[a].last=translated;
+      if(raw!==translated)node.setAttribute(a,translated);
     }
-    for(const child of node.childNodes) translateNode(child);
+    for(const child of node.childNodes)translateNode(child);
   }
 
   function apply(){
     document.documentElement.lang=lang;
+    document.title=translateString('Паркур');
     translateNode(document.body);
     const b=document.getElementById('mmFlag');
     if(b)b.innerHTML=lang==='ru'?'🇷🇺':'🇺🇸';
@@ -3615,35 +3956,26 @@ if ('serviceWorker' in navigator) {
 
   function addButton(){
     const tg=document.getElementById('mmTelegram');
-    if(tg){
-      tg.onclick=()=>window.open('https://t.me/ParKurNEWS','_blank','noopener,noreferrer');
-      tg.setAttribute('aria-label','Telegram ParKurNEWS');
-    }
+    if(tg){tg.onclick=()=>window.open('https://t.me/ParKurNEWS','_blank','noopener,noreferrer');tg.setAttribute('aria-label','Telegram ParKurNEWS');}
     const b=document.getElementById('mmFlag');
     if(!b)return;
-    b.style.pointerEvents='auto';
-    b.style.cursor='pointer';
-    b.style.background='transparent';
-    b.style.border='0';
-    b.style.display='flex';
-    b.style.alignItems='center';
-    b.style.justifyContent='center';
-    b.style.fontSize='min(5vh,3vw)';
-    b.style.textShadow='0 1px 2px rgba(0,0,0,.35)';
-    b.setAttribute('role','button');
-    b.setAttribute('aria-label','Switch language');
+    b.style.pointerEvents='auto';b.style.cursor='pointer';b.style.background='transparent';b.style.border='0';
+    b.style.display='flex';b.style.alignItems='center';b.style.justifyContent='center';
+    b.style.fontSize='min(5vh,3vw)';b.style.textShadow='0 1px 2px rgba(0,0,0,.35)';
+    b.setAttribute('role','button');b.setAttribute('aria-label','Switch language');
     b.onclick=()=>setGameLanguage(lang==='ru'?'en':'ru');
   }
 
   function boot(){
-    addButton();
-    apply();
+    addButton();apply();
     const obs=new MutationObserver(muts=>{
-      if(muts.some(m=>m.addedNodes&&m.addedNodes.length)){
-        for(const m of muts)for(const n of m.addedNodes)translateNode(n);
+      for(const m of muts){
+        if(m.type==='characterData')translateNode(m.target);
+        if(m.type==='attributes')translateNode(m.target);
+        for(const n of m.addedNodes||[])translateNode(n);
       }
     });
-    obs.observe(document.body,{childList:true,subtree:true});
+    obs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label','alt','value']});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
