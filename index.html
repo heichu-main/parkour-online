@@ -3024,12 +3024,14 @@ function mpRenderPlayerRoster(){
   const box=$('mpPlayerRoster');if(!box)return;
   const connected=!!(mpConn&&mpConn.readyState===WebSocket.OPEN);
   if(!connected){box.style.display='none';mpRosterSignature='';return;}
-  const players=[{id:mpLocalId||mpClientId,nick:(store.get('pk_mp_nick','').trim()||'Player'),me:true}];
-  for(const [id,r] of mpRemotePlayers){if(r&&r.data)players.push({id,nick:(String(r.data.name||'Player').trim()||'Player'),me:false});}
-  const signature=players.map(p=>p.id+'|'+p.nick).join('\n');
+  const localNick=(store.get('pk_mp_nick','').trim()||'Player');
+  const localTag=store.get('pk_mp_tag','').trim().replace(/[<>]/g,'').slice(0,28);
+  const players=[{id:mpLocalId||mpClientId,nick:localNick,tag:localTag,me:true}];
+  for(const [id,r] of mpRemotePlayers){if(r&&r.data)players.push({id,nick:(String(r.data.name||'Player').trim()||'Player'),tag:String(r.data.tagText||'').trim().replace(/[<>]/g,'').slice(0,28),me:false});}
+  const signature=players.map(p=>p.id+'|'+p.nick+'|'+p.tag).join('\n');
   box.style.display='block';if(signature===mpRosterSignature)return;mpRosterSignature=signature;
   box.replaceChildren();const title=document.createElement('div');title.className='mpr-title';title.textContent=(store.get('pk_lang','ru')==='en'?'PLAYERS':'ИГРОКИ')+' · '+players.length;box.appendChild(title);
-  for(const p of players){const row=document.createElement('div');row.className='mpr-player'+(p.me?' me':'');row.textContent=p.nick;row.title=p.nick;box.appendChild(row);}
+  for(const p of players){const row=document.createElement('div');row.className='mpr-player'+(p.me?' me':'');row.textContent=p.tag?p.nick+' · '+p.tag:p.nick;row.title=row.textContent;box.appendChild(row);}
 }
 function mpStatus(t){const el=$('mpStatus');if(el)el.textContent=t;}
 function mpGetClientId(){let id=store.get('pk_client_id','');if(!id){id='P-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,10).toUpperCase();store.set('pk_client_id',id);}return id;}
@@ -3102,7 +3104,7 @@ function mpHandlePacket(packet){
   }else if(packet.type==='peer-left'){mpRemoveRemote(packet.id);mpStatus('Игрок отключился. На сервере ещё '+mpRemotePlayers.size+' других игроков.');}
   else if(packet.type==='admin-player-list'&&mpIsAdmin()){mpRenderAdminPlayers(packet.players||[]);}
   else if(packet.type==='admin-result'){const el=$('adminMsg');if(el)el.textContent=packet.message||'Готово';}
-  else if(packet.type==='admin-tag-update'&&packet.id){if(packet.id===mpLocalId){store.set('pk_mp_tag',packet.tagText||'');store.set('pk_mp_tag_color',packet.tagColor||'#ffd54a');mpUpdateLocalNameTag();}else{let r=mpRemotePlayers.get(packet.id);if(r&&r.data){r.data.tagText=packet.tagText||'';r.data.tagColor=packet.tagColor||'#ffd54a';mpSetRemoteName(r,r.data.name,r.data.tagText,r.data.tagColor);}}}
+  else if(packet.type==='admin-tag-update'&&packet.id){if(packet.id===mpLocalId){store.set('pk_mp_tag',packet.tagText||'');store.set('pk_mp_tag_color',packet.tagColor||'#ffd54a');mpUpdateLocalNameTag();mpRenderPlayerRoster();}else{let r=mpRemotePlayers.get(packet.id);if(r&&r.data){r.data.tagText=packet.tagText||'';r.data.tagColor=packet.tagColor||'#ffd54a';mpSetRemoteName(r,r.data.name,r.data.tagText,r.data.tagColor);mpRenderPlayerRoster();}}}
   else if(packet.type==='coin-update'){mpApplyServerCoins(packet.coins);}
   else if(packet.type==='kicked'){mpStatus('Тебя отключил администратор. Можно подключиться снова.');mpClean();}
   else if(packet.type==='peer-data'&&packet.id&&packet.id!==mpLocalId){
