@@ -3260,7 +3260,7 @@ function mpResolvePlayerCollision(remote,dt){
 
 function mpUpdate(dt,now){
   mpUpdateLocalNameTag();
-  if(mpConn&&mpConn.readyState===WebSocket.OPEN&&now-mpLastSend>50){
+  if(mpConn&&mpConn.readyState===WebSocket.OPEN&&now-mpLastSend>100){
     mpLastSend=now;const x=mode===PHYS?BD[0].x:C.x,y=mode===PHYS?BD[0].y:C.by+HOVER;
     mpRefreshLocalParts();scene.updateMatrixWorld(true);const parts=[];
     for(const src of mpLocalParts){src.updateMatrixWorld(true);let vis=true;for(let a=src;a&&a!==scene;a=a.parent)if(!a.visible){vis=false;break;}const mat=Array.isArray(src.material)?src.material[0]:src.material;const part={m:src.matrixWorld.toArray(),v:vis,c:mat&&mat.color?mat.color.getHex():null,o:mat&&Number.isFinite(mat.opacity)?mat.opacity:1};if(cloth&&src===cloth.mesh&&cloth.pos){part.clothPos=Array.from(cloth.pos);part.clothCol=Array.from(cloth.col);}parts.push(part);}

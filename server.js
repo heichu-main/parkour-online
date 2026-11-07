@@ -12,14 +12,14 @@ const server = http.createServer((req, res) => {
   if (req.url === '/' || req.url.startsWith('/?')) { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' }); return fs.createReadStream(INDEX).pipe(res); }
   res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' }); res.end('Not found');
 });
-const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 32 * 1024 * 1024 });
+const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 8 * 1024 * 1024, perMessageDeflate: { threshold: 1024, zlibDeflateOptions: { level: 3 }, zlibInflateOptions: { chunkSize: 10 * 1024 }, concurrencyLimit: 10 } });
 const players = new Map();
 let fallbackId = 1;
 let balances = {};
 try { balances = JSON.parse(fs.readFileSync(BALANCES_FILE, 'utf8')); if (!balances || typeof balances !== 'object' || Array.isArray(balances)) balances = {}; } catch { balances = {}; }
 function saveBalances() { try { fs.writeFileSync(BALANCES_FILE, JSON.stringify(balances, null, 2)); } catch (e) { console.error('Could not save balances:', e.message); } }
 function send(ws, obj) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj)); }
-function broadcast(obj, except = null) { const packet = JSON.stringify(obj); for (const ws of wss.clients) if (ws !== except && ws.readyState === WebSocket.OPEN) ws.send(packet); }
+function broadcast(obj, except = null) { const packet = JSON.stringify(obj); for (const ws of wss.clients) if (ws !== except && ws.readyState === WebSocket.OPEN && ws.bufferedAmount < 512 * 1024) ws.send(packet); }
 function cleanText(value, max, fallback = '') { return String(value ?? '').replace(/[<>\\]/g, '').trim().slice(0, max) || fallback; }
 function isAdmin(record) { return !!record && record.clientId === ADMIN_ID; }
 function onlineList() { return [...players.values()].filter(p => p.ready).map(p => ({ id: p.clientId, nick: p.nick || 'Игрок', tagText: p.tagText || '', tagColor: p.tagColor || '#ffd54a' })); }
@@ -39,7 +39,7 @@ function sendWelcome(ws, record) {
 }
 
 wss.on('connection', (ws) => {
-  const record = { clientId: null, ready: false, state: null, appearance: null, nick: 'Игрок', tagText: '', tagColor: '#ffd54a', joinedAt: Date.now() };
+  const record = { clientId: null, ready: false, state: null, pendingState: false, appearance: null, nick: 'Игрок', tagText: '', tagColor: '#ffd54a', joinedAt: Date.now() };
   players.set(ws, record);
   ws.on('message', (raw) => {
     let data; try { data = JSON.parse(raw.toString()); } catch { return; }
@@ -60,9 +60,10 @@ wss.on('connection', (ws) => {
     if (!record.ready) return;
 
     if (data.type === 'state') {
+      // Keep only the newest position/state; obsolete frames are coalesced below.
       record.state = data;
       record.state.name = record.nick; record.state.tagText = record.tagText; record.state.tagColor = record.tagColor;
-      broadcast({ type: 'peer-data', id: record.clientId, data: record.state }, ws);
+      record.pendingState = true;
       return;
     }
     if (data.type === 'appearance') { record.appearance = Array.isArray(data.parts) ? data.parts : null; broadcast({ type: 'peer-data', id: record.clientId, data: { type: 'appearance', parts: record.appearance } }, ws); return; }
@@ -125,4 +126,16 @@ wss.on('connection', (ws) => {
   });
   ws.on('error', () => {});
 });
+// Broadcast the newest state at 10 Hz instead of relaying every incoming frame.
+setInterval(() => {
+  for (const [ws, p] of players) {
+    if (!p.ready || !p.pendingState || !p.state) continue;
+    p.pendingState = false;
+    const packet = JSON.stringify({ type: 'peer-data', id: p.clientId, data: p.state });
+    for (const target of wss.clients) {
+      if (target !== ws && target.readyState === WebSocket.OPEN && target.bufferedAmount < 512 * 1024) target.send(packet);
+    }
+  }
+}, 100).unref();
+
 server.listen(PORT, '0.0.0.0', () => console.log(`Parkour server listening on 0.0.0.0:${PORT}`));
